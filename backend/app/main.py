@@ -5,15 +5,19 @@ Smart Cold Storage - FastAPI Backend API.
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from app.routes.auth_routes import router as auth_router
 from app.routes.notification_routes import router as notification_router
+from app.routes.ai_routes import router as ai_router
 from app.websocket_manager import ws_manager
 
 app = FastAPI(
     title="Smart Cold Storage API",
-    description="IoT Telemetry, Alert Notification & OTP Authentication Service",
-    version="2.4.0"
+    description="IoT Telemetry, Alert Notification, OTP Authentication & AI Streaming Service",
+    version="2.5.0"
 )
 
 # Enable CORS for React Native Web & Mobile Dev
@@ -28,6 +32,7 @@ app.add_middleware(
 # Mount Routes
 app.include_router(auth_router)
 app.include_router(notification_router)
+app.include_router(ai_router)
 
 @app.get("/")
 async def root():

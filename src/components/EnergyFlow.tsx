@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface EnergyFlowProps {
   windGenerationKw: number;
@@ -16,46 +18,49 @@ export default function EnergyFlow({
   consumptionKw,
   isCharging,
 }: EnergyFlowProps) {
+  const { theme } = useTheme();
+  const { t } = useLanguage();
+
   const steps = [
     {
       id: 'wind',
       icon: 'weather-windy',
-      title: 'WIND',
+      title: t('stepWind', 'WIND'),
       value: `${windGenerationKw.toFixed(1)} kW`,
-      color: colors.secondary,
+      color: theme.secondary,
     },
     {
       id: 'energy',
       icon: 'flash',
-      title: 'ENERGY',
-      value: 'Hybrid',
-      color: colors.warning,
+      title: t('stepEnergy', 'ENERGY'),
+      value: t('hybrid', 'Hybrid'),
+      color: theme.warning,
     },
     {
       id: 'battery',
       icon: isCharging ? 'battery-charging-80' : 'battery-80',
-      title: 'BATTERY',
+      title: t('stepBattery', 'BATTERY'),
       value: `${batteryLevel}%`,
-      color: colors.primary,
+      color: theme.primary,
     },
     {
       id: 'cooling',
       icon: 'snowflake',
-      title: 'COOLING',
+      title: t('stepCooling', 'COOLING'),
       value: `${consumptionKw.toFixed(1)} kW`,
-      color: colors.secondary,
+      color: theme.secondary,
     },
     {
       id: 'storage',
       icon: 'fruit-cherries',
-      title: 'CROPS',
-      value: 'Safe',
-      color: colors.primary,
+      title: t('stepCrops', 'CROPS'),
+      value: t('safe', 'Safe'),
+      color: theme.primary,
     },
   ];
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.backgroundSubtle, borderColor: theme.border }]}>
       <View style={styles.flowRow}>
         {steps.map((step, idx) => (
           <React.Fragment key={step.id}>
@@ -63,13 +68,13 @@ export default function EnergyFlow({
               <View style={[styles.iconCircle, { borderColor: step.color, backgroundColor: `${step.color}15` }]}>
                 <MaterialCommunityIcons name={step.icon as any} size={18} color={step.color} />
               </View>
-              <Text style={styles.nodeTitle}>{step.title}</Text>
+              <Text style={[styles.nodeTitle, { color: theme.textSecondary }]}>{step.title}</Text>
               <Text style={[styles.nodeValue, { color: step.color }]}>{step.value}</Text>
             </View>
 
             {idx < steps.length - 1 && (
               <View style={styles.connector}>
-                <MaterialCommunityIcons name="arrow-right-thin" size={18} color={colors.textLight} />
+                <MaterialCommunityIcons name="arrow-right-thin" size={18} color={theme.border} />
               </View>
             )}
           </React.Fragment>
@@ -80,12 +85,12 @@ export default function EnergyFlow({
         <MaterialCommunityIcons 
           name={isCharging ? "battery-charging" : "battery-minus"} 
           size={16} 
-          color={isCharging ? colors.success : colors.warning} 
+          color={isCharging ? theme.success : theme.warning} 
         />
-        <Text style={[styles.statusBannerText, { color: isCharging ? colors.success : colors.warning }]}>
+        <Text style={[styles.statusBannerText, { color: isCharging ? theme.success : theme.warning }]}>
           {isCharging 
-            ? 'Battery Charging • Renewable Clean Power' 
-            : 'Battery Supplying Off-Grid Cooling'}
+            ? t('batteryChargingRenewable', 'Battery Charging • Renewable Clean Power') 
+            : t('batterySupplyingCooling', 'Battery Supplying Off-Grid Cooling')}
         </Text>
       </View>
     </View>

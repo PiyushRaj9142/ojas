@@ -2,14 +2,16 @@ import React from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, Switch, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeContext';
+import { useLanguage } from '../i18n/LanguageContext';
 import { LanguageCode } from '../types/user';
+import { INDIAN_LANGUAGES } from '../i18n/translations';
 import ThemeSelector from '../components/ThemeSelector';
 
 interface SettingsModalProps {
   visible: boolean;
   onClose: () => void;
-  language: LanguageCode;
-  onSelectLanguage: (lang: LanguageCode) => void;
+  language?: LanguageCode;
+  onSelectLanguage?: (lang: LanguageCode) => void;
   tempUnit: '°C' | '°F';
   onToggleTempUnit: () => void;
   notificationsEnabled: boolean;
@@ -21,8 +23,8 @@ interface SettingsModalProps {
 export default function SettingsModal({
   visible,
   onClose,
-  language,
-  onSelectLanguage,
+  language: propLanguage,
+  onSelectLanguage: propOnSelectLanguage,
   tempUnit,
   onToggleTempUnit,
   notificationsEnabled,
@@ -31,13 +33,16 @@ export default function SettingsModal({
   onToggleDemoMode,
 }: SettingsModalProps) {
   const { theme } = useTheme();
+  const { language: ctxLanguage, setLanguage, t } = useLanguage();
+  const language = propLanguage || ctxLanguage;
+  const onSelectLanguage = propOnSelectLanguage || setLanguage;
 
   return (
     <Modal visible={visible} transparent={true} animationType="slide" onRequestClose={onClose}>
       <View style={[styles.modalOverlay, { backgroundColor: theme.modalOverlay }]}>
         <View style={[styles.sheetCard, { backgroundColor: theme.card }]}>
           <View style={[styles.header, { borderBottomColor: theme.border }]}>
-            <Text style={[styles.title, { color: theme.textPrimary }]}>Application Settings</Text>
+            <Text style={[styles.title, { color: theme.textPrimary }]}>{t('appSettings', 'Application Settings')}</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
               <Ionicons name="close" size={22} color={theme.textSecondary} />
             </TouchableOpacity>
@@ -45,34 +50,30 @@ export default function SettingsModal({
 
           <ScrollView style={styles.body} showsVerticalScrollIndicator={false}>
             {/* Theme Selector (LIGHT / DARK / MILD) */}
-            <Text style={[styles.sectionHeader, { color: theme.textSecondary }]}>Theme Mode / थीम मोड</Text>
+            <Text style={[styles.sectionHeader, { color: theme.textSecondary }]}>{t('themeMode', 'Theme Mode')}</Text>
             <ThemeSelector language={language} compact={false} />
 
             {/* Language Selector */}
-            <Text style={[styles.sectionHeader, { color: theme.textSecondary, marginTop: 12 }]}>Language / भाषा</Text>
+            <Text style={[styles.sectionHeader, { color: theme.textSecondary, marginTop: 12 }]}>{t('languageSelect', 'Language / भाषा')}</Text>
             <View style={styles.langGrid}>
-              {[
-                { id: 'en' as const, label: 'English (EN)' },
-                { id: 'hi' as const, label: 'हिंदी (Hindi)' },
-                { id: 'hinglish' as const, label: 'Hinglish' },
-              ].map((item) => (
+              {INDIAN_LANGUAGES.map((item) => (
                 <TouchableOpacity
-                  key={item.id}
+                  key={item.code}
                   style={[
                     styles.langOption,
                     { backgroundColor: theme.backgroundSubtle, borderColor: theme.border },
-                    language === item.id && { backgroundColor: theme.primaryLight, borderColor: theme.primary },
+                    language === item.code && { backgroundColor: theme.primaryLight, borderColor: theme.primary },
                   ]}
-                  onPress={() => onSelectLanguage(item.id)}
+                  onPress={() => onSelectLanguage(item.code)}
                 >
                   <Text
                     style={[
                       styles.langOptionText,
                       { color: theme.textSecondary },
-                      language === item.id && { color: theme.primaryDark, fontWeight: '800' },
+                      language === item.code && { color: theme.primaryDark, fontWeight: '800' },
                     ]}
                   >
-                    {item.label}
+                    {item.flag} {item.nativeName}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -81,7 +82,7 @@ export default function SettingsModal({
             {/* Temperature Unit */}
             <View style={styles.settingRow}>
               <View>
-                <Text style={[styles.settingTitle, { color: theme.textPrimary }]}>Temperature Unit</Text>
+                <Text style={[styles.settingTitle, { color: theme.textPrimary }]}>{t('tempUnit', 'Temperature Unit')}</Text>
                 <Text style={[styles.settingDesc, { color: theme.textMuted }]}>Currently displaying {tempUnit}</Text>
               </View>
               <TouchableOpacity
@@ -95,7 +96,7 @@ export default function SettingsModal({
             {/* Push Notifications */}
             <View style={styles.settingRow}>
               <View>
-                <Text style={[styles.settingTitle, { color: theme.textPrimary }]}>Push Notifications</Text>
+                <Text style={[styles.settingTitle, { color: theme.textPrimary }]}>{t('pushNotifications', 'Push Notifications')}</Text>
                 <Text style={[styles.settingDesc, { color: theme.textMuted }]}>Receive critical temperature & battery alerts</Text>
               </View>
               <Switch
@@ -108,7 +109,7 @@ export default function SettingsModal({
             {/* Judge Demo Mode Toggle */}
             <View style={[styles.settingRow, styles.demoRow, { backgroundColor: theme.primaryLight }]}>
               <View>
-                <Text style={[styles.settingTitle, { color: theme.primaryDark }]}>Judge Presentation Demo</Text>
+                <Text style={[styles.settingTitle, { color: theme.primaryDark }]}>{t('judgeDemoMode', 'Judge Presentation Demo')}</Text>
                 <Text style={[styles.settingDesc, { color: theme.textSecondary }]}>10-Step automated evaluation</Text>
               </View>
               <Switch

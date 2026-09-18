@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface StorageVisualizationProps {
   temperature: number;
@@ -18,65 +20,70 @@ export default function StorageVisualization({
   capacityUsedKg,
   capacityMaxKg,
 }: StorageVisualizationProps) {
+  const { theme } = useTheme();
+  const { language, t } = useLanguage();
+
   const zones = [
     {
       id: 'z1',
-      name: 'Zone A (Upper Shelf)',
+      name: t('zoneAUpper', 'Zone A (Upper Shelf - Tomatoes)'),
       temp: '5.2°C',
-      ideal: 'Tomatoes, Brinjals',
+      ideal: `${t('cropTomato', 'Tomatoes')}, Brinjals`,
       color: '#ef4444',
       crates: 4,
     },
     {
       id: 'z2',
-      name: 'Zone B (Middle Shelf)',
+      name: t('zoneBMiddle', 'Zone B (Middle Shelf - Carrots/Capsicum)'),
       temp: '4.7°C',
-      ideal: 'Capsicum, Carrots, Beans',
+      ideal: `${t('cropCarrot', 'Carrots')}, Capsicum, Beans`,
       color: '#16a34a',
       crates: 5,
     },
     {
       id: 'z3',
-      name: 'Zone C (Lower Cold Core)',
+      name: t('zoneCLower', 'Zone C (Lower Cold Core - Leafy Greens)'),
       temp: '2.8°C',
-      ideal: 'Leafy Greens, Peas, Cauliflower',
+      ideal: `${t('cropPeas', 'Green Peas')}, ${t('cropCauliflower', 'Cauliflower')}`,
       color: '#0284c7',
       crates: 3,
     },
   ];
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <MaterialCommunityIcons name="cube-scan" size={20} color={colors.primary} />
-          <Text style={styles.title}>Micro-Climate Chamber Racks</Text>
+          <MaterialCommunityIcons name="cube-scan" size={20} color={theme.primary} />
+          <Text style={[styles.title, { color: theme.textPrimary }]}>
+            {t('microClimateRacks', 'Micro-Climate Chamber Racks')}
+          </Text>
         </View>
-        <View style={styles.capacityBadge}>
-          <Text style={styles.capacityText}>{capacityUsedKg} / {capacityMaxKg} kg ({capacityUsedPercentage}%)</Text>
+        <View style={[styles.capacityBadge, { backgroundColor: theme.primaryLight }]}>
+          <Text style={[styles.capacityText, { color: theme.primaryDark }]}>{capacityUsedKg} / {capacityMaxKg} kg ({capacityUsedPercentage}%)</Text>
         </View>
       </View>
 
       {/* Progress Capacity Bar */}
-      <View style={styles.capacityBarContainer}>
-        <View style={[styles.capacityBarFill, { width: `${capacityUsedPercentage}%` }]} />
+      <View style={[styles.capacityBarContainer, { backgroundColor: theme.backgroundSubtle }]}>
+        <View style={[styles.capacityBarFill, { width: `${capacityUsedPercentage}%`, backgroundColor: theme.primary }]} />
       </View>
 
       {/* 3 Physical Racks Visual */}
       <View style={styles.racksContainer}>
         {zones.map((zone) => (
-          <View key={zone.id} style={[styles.rackRow, { borderLeftColor: zone.color }]}>
+          <View key={zone.id} style={[styles.rackRow, { backgroundColor: theme.backgroundSubtle, borderColor: theme.border, borderLeftColor: zone.color }]}>
             <View style={styles.rackHeader}>
               <View style={styles.rackTitleRow}>
                 <View style={[styles.rackDot, { backgroundColor: zone.color }]} />
-                <Text style={styles.rackName}>{zone.name}</Text>
+                <Text style={[styles.rackName, { color: theme.textPrimary }]}>{zone.name}</Text>
               </View>
               <Text style={[styles.rackTemp, { color: zone.color }]}>{zone.temp}</Text>
             </View>
 
             <View style={styles.rackFooter}>
-              <Text style={styles.rackIdeal} numberOfLines={1}>Crops: {zone.ideal}</Text>
-              <Text style={styles.rackCrates}>{zone.crates} Crates</Text>
+              <Text style={[styles.rackIdeal, { color: theme.textMuted }]} numberOfLines={1}>{t('actionInventory', 'Crops')}: {zone.ideal}</Text>
+              <Text style={[styles.rackCrates, { color: theme.textSecondary }]}>{zone.crates} {t('crates', 'Crates')}</Text>
             </View>
           </View>
         ))}

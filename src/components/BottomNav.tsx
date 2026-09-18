@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeContext';
+import { useLanguage } from '../i18n/LanguageContext';
 
 export type MainTabType = 'HOME' | 'STORAGE' | 'ANALYTICS' | 'ALERTS' | 'PROFILE';
 
@@ -17,32 +18,33 @@ export default function BottomNav({
   alertsCount = 0,
 }: BottomNavProps) {
   const { theme } = useTheme();
+  const { t } = useLanguage();
 
   const tabs = [
     {
       id: 'HOME' as MainTabType,
-      label: 'HOME',
+      label: t('navHome', 'HOME'),
       icon: (active: boolean) => (
         <Feather name="home" size={20} color={active ? theme.primary : theme.textMuted} />
       ),
     },
     {
       id: 'STORAGE' as MainTabType,
-      label: 'STORAGE',
+      label: t('navStorage', 'STORAGE'),
       icon: (active: boolean) => (
         <MaterialCommunityIcons name="snowflake" size={22} color={active ? theme.primary : theme.textMuted} />
       ),
     },
     {
       id: 'ANALYTICS' as MainTabType,
-      label: 'ANALYTICS',
+      label: t('navAnalytics', 'ANALYTICS'),
       icon: (active: boolean) => (
         <Feather name="bar-chart-2" size={20} color={active ? theme.primary : theme.textMuted} />
       ),
     },
     {
       id: 'ALERTS' as MainTabType,
-      label: 'ALERTS',
+      label: t('navAlerts', 'ALERTS'),
       hasBadge: alertsCount > 0,
       badgeCount: alertsCount,
       icon: (active: boolean) => (
@@ -51,7 +53,7 @@ export default function BottomNav({
     },
     {
       id: 'PROFILE' as MainTabType,
-      label: 'PROFILE',
+      label: t('navProfile', 'PROFILE'),
       icon: (active: boolean) => (
         <Feather name="user" size={20} color={active ? theme.primary : theme.textMuted} />
       ),

@@ -3,12 +3,16 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface OnboardingScreenProps {
   onFinish: () => void;
 }
 
 export default function OnboardingScreen({ onFinish }: OnboardingScreenProps) {
+  const { theme } = useTheme();
+  const { language, t } = useLanguage();
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const slides = [
@@ -67,9 +71,9 @@ export default function OnboardingScreen({ onFinish }: OnboardingScreenProps) {
         </View>
 
         {/* Title & Description */}
-        <Text style={styles.title}>{slide.title}</Text>
-        <Text style={styles.titleHi}>{slide.titleHi}</Text>
-        <Text style={styles.description}>{slide.description}</Text>
+        <Text style={[styles.title, { color: theme.textPrimary }]}>{slide.title}</Text>
+        {language !== 'en' && <Text style={[styles.titleHi, { color: theme.primary }]}>{slide.titleHi}</Text>}
+        <Text style={[styles.description, { color: theme.textSecondary }]}>{slide.description}</Text>
       </View>
 
       {/* Pagination & Next/Get Started Button */}
@@ -80,7 +84,8 @@ export default function OnboardingScreen({ onFinish }: OnboardingScreenProps) {
               key={idx}
               style={[
                 styles.paginationDot,
-                currentSlide === idx && styles.paginationDotActive,
+                { backgroundColor: theme.border },
+                currentSlide === idx && [styles.paginationDotActive, { backgroundColor: theme.primary }],
               ]}
             />
           ))}
@@ -98,7 +103,7 @@ export default function OnboardingScreen({ onFinish }: OnboardingScreenProps) {
             style={styles.btnGradient}
           >
             <Text style={styles.btnText}>
-              {currentSlide === slides.length - 1 ? 'Get Started' : 'Next →'}
+              {currentSlide === slides.length - 1 ? t('verifyOtp', 'Get Started →') : `${t('demoNext', 'Next')} →`}
             </Text>
           </LinearGradient>
         </TouchableOpacity>

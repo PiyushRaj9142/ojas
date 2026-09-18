@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
+import { useLanguage } from '../i18n/LanguageContext';
 import { SensorTelemetry } from '../types/sensor';
 import DigitalTwinView from '../components/DigitalTwinView';
 
@@ -10,20 +12,23 @@ interface DigitalTwinScreenProps {
 }
 
 export default function DigitalTwinScreen({ telemetry }: DigitalTwinScreenProps) {
+  const { theme } = useTheme();
+  const { t } = useLanguage();
+
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: theme.background }]}
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
     >
-      <View style={styles.headerBox}>
+      <View style={[styles.headerBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
         <View style={styles.headerLeft}>
-          <View style={styles.twinIconBadge}>
-            <MaterialCommunityIcons name="cube-scan" size={24} color={colors.primary} />
+          <View style={[styles.twinIconBadge, { backgroundColor: theme.primaryLight }]}>
+            <MaterialCommunityIcons name="cube-scan" size={24} color={theme.primary} />
           </View>
           <View>
-            <Text style={styles.title}>System Digital Twin</Text>
-            <Text style={styles.subtitle}>Interactive 2.5D Physical Subsystem Simulation</Text>
+            <Text style={[styles.title, { color: theme.textPrimary }]}>{t('digitalTwinTitle', 'System Digital Twin')}</Text>
+            <Text style={[styles.subtitle, { color: theme.textMuted }]}>{t('digitalTwinSub', 'Interactive 2.5D Physical Subsystem Simulation')}</Text>
           </View>
         </View>
       </View>
@@ -32,10 +37,10 @@ export default function DigitalTwinScreen({ telemetry }: DigitalTwinScreenProps)
       <DigitalTwinView telemetry={telemetry} />
 
       {/* Architecture Overview Card */}
-      <View style={styles.infoCard}>
-        <Text style={styles.infoTitle}>About This Digital Twin</Text>
-        <Text style={styles.infoText}>
-          The digital twin synchronizes physical farm telemetry every few seconds from the VAWT rotor, LiFePO4 battery BMS, variable compressor, and micro-climate IoT array. Tap any component above to inspect deep engineering telemetry.
+      <View style={[styles.infoCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+        <Text style={[styles.infoTitle, { color: theme.textPrimary }]}>{t('aboutDigitalTwin', 'About This Digital Twin')}</Text>
+        <Text style={[styles.infoText, { color: theme.textSecondary }]}>
+          {t('aboutDigitalTwinDesc', 'The digital twin synchronizes physical farm telemetry every few seconds from the VAWT rotor, LiFePO4 battery BMS, variable compressor, and micro-climate IoT array. Tap any component above to inspect deep engineering telemetry.')}
         </Text>
       </View>
     </ScrollView>
@@ -49,7 +54,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 16,
-    paddingBottom: 90,
+    paddingBottom: 120,
   },
   headerBox: {
     flexDirection: 'row',

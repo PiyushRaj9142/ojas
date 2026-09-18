@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'rea
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
 import { useTheme } from '../theme/ThemeContext';
+import { useLanguage } from '../i18n/LanguageContext';
 import { UserProfile, LanguageCode } from '../types/user';
 import SettingsModal from './SettingsModal';
 
@@ -26,13 +27,22 @@ export default function ProfileScreen({
   onLogout,
 }: ProfileScreenProps) {
   const { theme, themeMode } = useTheme();
+  const { language, setLanguage, t } = useLanguage();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const handleSupportCall = () => {
     Alert.alert(
-      'Kisan Agri Support',
+      t('agroHotline', 'Kisan Agri Support'),
       'Contact Smart Cold Storage 24x7 Agro Hotline at 1800-180-1551?'
     );
+  };
+
+  const getInitials = (name: string) => {
+    const parts = (name || 'Kisan').trim().split(' ');
+    if (parts.length >= 2 && parts[0] && parts[1]) {
+      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    }
+    return (name?.[0] || 'K').toUpperCase();
   };
 
   return (
@@ -44,7 +54,7 @@ export default function ProfileScreen({
       {/* 1. Farmer Identity Card */}
       <View style={[styles.profileCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
         <View style={[styles.avatarCircle, { backgroundColor: theme.primary }]}>
-          <Text style={styles.avatarText}>RP</Text>
+          <Text style={styles.avatarText}>{getInitials(user.name)}</Text>
         </View>
 
         <Text style={[styles.farmerName, { color: theme.textPrimary }]}>{user.name}</Text>
@@ -58,27 +68,27 @@ export default function ProfileScreen({
 
       {/* 2. Cold Storage Unit Identity */}
       <View style={[styles.storageCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
-        <Text style={[styles.cardHeaderTitle, { color: theme.textPrimary }]}>Cold Storage Specifications</Text>
+        <Text style={[styles.cardHeaderTitle, { color: theme.textPrimary }]}>{t('storageSpecs', 'Cold Storage Specifications')}</Text>
 
         <View style={styles.storageGrid}>
           <View style={[styles.specRow, { backgroundColor: theme.backgroundSubtle }]}>
-            <Text style={[styles.specLabel, { color: theme.textMuted }]}>Storage ID</Text>
+            <Text style={[styles.specLabel, { color: theme.textMuted }]}>{t('storageId', 'Storage ID')}</Text>
             <Text style={[styles.specValue, { color: theme.textPrimary }]}>{user.coldStorageId}</Text>
           </View>
 
           <View style={[styles.specRow, { backgroundColor: theme.backgroundSubtle }]}>
-            <Text style={[styles.specLabel, { color: theme.textMuted }]}>Farm Location</Text>
+            <Text style={[styles.specLabel, { color: theme.textMuted }]}>{t('farmLocation', 'Farm Location')}</Text>
             <Text style={[styles.specValue, { color: theme.textPrimary }]}>{user.location}</Text>
           </View>
 
           <View style={[styles.specRow, { backgroundColor: theme.backgroundSubtle }]}>
-            <Text style={[styles.specLabel, { color: theme.textMuted }]}>Total Capacity</Text>
+            <Text style={[styles.specLabel, { color: theme.textMuted }]}>{t('totalCapacity', 'Total Capacity')}</Text>
             <Text style={[styles.specValue, { color: theme.textPrimary }]}>{user.totalCapacityKg} kg</Text>
           </View>
 
           <View style={[styles.specRow, { backgroundColor: theme.backgroundSubtle }]}>
-            <Text style={[styles.specLabel, { color: theme.textMuted }]}>Generation Link</Text>
-            <Text style={[styles.specValue, { color: theme.secondary }]}>VAWT Wind + LiFePO4</Text>
+            <Text style={[styles.specLabel, { color: theme.textMuted }]}>{t('generationLink', 'Generation Link')}</Text>
+            <Text style={[styles.specValue, { color: theme.secondary }]}>{t('vawtLiFePO4', 'VAWT Wind + LiFePO4')}</Text>
           </View>
         </View>
       </View>
@@ -94,10 +104,10 @@ export default function ProfileScreen({
             <View style={[styles.menuIcon, { backgroundColor: theme.primaryLight }]}>
               <Feather name="globe" size={16} color={theme.primary} />
             </View>
-            <Text style={[styles.menuLabel, { color: theme.textPrimary }]}>Language / भाषा</Text>
+            <Text style={[styles.menuLabel, { color: theme.textPrimary }]}>{t('languageSelect', 'Language / भाषा')}</Text>
           </View>
           <View style={styles.menuRight}>
-            <Text style={[styles.menuValText, { color: theme.textMuted }]}>{user.language.toUpperCase()}</Text>
+            <Text style={[styles.menuValText, { color: theme.textMuted }]}>{language.toUpperCase()}</Text>
             <Feather name="chevron-right" size={16} color={theme.textMuted} />
           </View>
         </TouchableOpacity>
@@ -111,7 +121,7 @@ export default function ProfileScreen({
             <View style={[styles.menuIcon, { backgroundColor: theme.secondaryLight }]}>
               <Feather name="moon" size={16} color={theme.secondary} />
             </View>
-            <Text style={[styles.menuLabel, { color: theme.textPrimary }]}>Theme / थीम मोड</Text>
+            <Text style={[styles.menuLabel, { color: theme.textPrimary }]}>{t('themeMode', 'Theme Mode')}</Text>
           </View>
           <View style={styles.menuRight}>
             <Text style={[styles.menuValText, { color: theme.textMuted }]}>{themeMode}</Text>
@@ -128,7 +138,7 @@ export default function ProfileScreen({
             <View style={[styles.menuIcon, { backgroundColor: theme.primaryLight }]}>
               <Feather name="sliders" size={16} color={theme.primary} />
             </View>
-            <Text style={[styles.menuLabel, { color: theme.textPrimary }]}>Units & Parameters</Text>
+            <Text style={[styles.menuLabel, { color: theme.textPrimary }]}>{t('unitsParams', 'Units & Parameters')}</Text>
           </View>
           <View style={styles.menuRight}>
             <Text style={[styles.menuValText, { color: theme.textMuted }]}>{user.tempUnit} • {user.weightUnit}</Text>
@@ -145,21 +155,21 @@ export default function ProfileScreen({
             <View style={[styles.menuIcon, { backgroundColor: theme.primaryLight }]}>
               <Feather name="phone-call" size={16} color={theme.primary} />
             </View>
-            <Text style={[styles.menuLabel, { color: theme.textPrimary }]}>Kisan Help & Support</Text>
+            <Text style={[styles.menuLabel, { color: theme.textPrimary }]}>{t('supportHelp', 'Kisan Help & Support')}</Text>
           </View>
           <Feather name="chevron-right" size={16} color={theme.textMuted} />
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.menuItem, { borderBottomWidth: 0 }]}
-          onPress={() => Alert.alert('About Smart Cold Storage', 'Version 2.4.1 (Hybrid Off-Grid SIH Edition)\nDesigned for smallholder farmer cold-chain preservation.')}
+          onPress={() => Alert.alert(t('aboutAppDialogTitle', 'About Smart Cold Storage'), t('aboutAppDialogDesc', 'Version 2.4.1 (Hybrid Off-Grid SIH Edition)\nDesigned for smallholder farmer cold-chain preservation.'))}
           activeOpacity={0.7}
         >
           <View style={styles.menuLeft}>
             <View style={[styles.menuIcon, { backgroundColor: theme.backgroundSubtle }]}>
               <Feather name="info" size={16} color={theme.textSecondary} />
             </View>
-            <Text style={[styles.menuLabel, { color: theme.textPrimary }]}>About App</Text>
+            <Text style={[styles.menuLabel, { color: theme.textPrimary }]}>{t('aboutApp', 'About App')}</Text>
           </View>
           <Text style={[styles.menuValText, { color: theme.textMuted }]}>v2.4.1</Text>
         </TouchableOpacity>
@@ -168,7 +178,7 @@ export default function ProfileScreen({
       {/* Logout Button */}
       <TouchableOpacity style={[styles.logoutBtn, { backgroundColor: theme.dangerLight }]} onPress={onLogout} activeOpacity={0.8}>
         <Feather name="log-out" size={16} color={theme.danger} />
-        <Text style={[styles.logoutText, { color: theme.danger }]}>Logout from Account</Text>
+        <Text style={[styles.logoutText, { color: theme.danger }]}>{t('logoutAccount', 'Logout from Account')}</Text>
       </TouchableOpacity>
 
       {/* Settings Modal */}
@@ -195,7 +205,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 16,
-    paddingBottom: 90,
+    paddingBottom: 120,
   },
   profileCard: {
     backgroundColor: colors.card,

@@ -75,3 +75,46 @@ export function findUserByPhone(phone: string): UserProfile | undefined {
   const clean = phone.replace(/\D/g, '').slice(-10);
   return REGISTERED_USERS.find((u) => u.mobile.replace(/\D/g, '').slice(-10) === clean);
 }
+
+export function findUserByIdentifier(identifier: string): UserProfile | undefined {
+  const trimmed = identifier.trim();
+  const cleanPhone = trimmed.replace(/\D/g, '').slice(-10);
+  
+  return REGISTERED_USERS.find(
+    (u) =>
+      (cleanPhone.length >= 10 && u.mobile.replace(/\D/g, '').slice(-10) === cleanPhone) ||
+      u.coldStorageId.toLowerCase() === trimmed.toLowerCase() ||
+      u.id.toLowerCase() === trimmed.toLowerCase()
+  );
+}
+
+export function registerNewUser(data: {
+  name: string;
+  mobile: string;
+  location: string;
+  coldStorageId?: string;
+  language?: any;
+}): UserProfile {
+  const generatedId = data.coldStorageId || `SC-${Math.floor(100 + Math.random() * 900)}`;
+  const newUser: UserProfile = {
+    id: `usr-${Date.now()}`,
+    name: data.name || 'Kisan Farmer',
+    mobile: data.mobile.replace(/\D/g, '').slice(-10) || '9876543210',
+    farmName: `${data.name || 'Kisan'} Agro Farm (सोलर फार्म)`,
+    coldStorageId: generatedId,
+    location: data.location || 'Nashik, Maharashtra',
+    totalCapacityKg: 500,
+    language: data.language || 'en',
+    tempUnit: '°C',
+    weightUnit: 'kg',
+    notificationsEnabled: true,
+    darkMode: false,
+    themeMode: 'LIGHT',
+    demoMode: false,
+    isLoggedIn: true,
+  };
+
+  // Add to in-memory list
+  REGISTERED_USERS.unshift(newUser);
+  return newUser;
+}

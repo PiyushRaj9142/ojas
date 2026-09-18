@@ -12,6 +12,7 @@ import {
 import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import { ThemeMode } from '../theme/colors';
 import { useTheme } from '../theme/ThemeContext';
+import { useLanguage } from '../i18n/LanguageContext';
 import { LanguageCode } from '../types/user';
 
 interface ThemeSwitcherProps {
@@ -59,23 +60,25 @@ const THEME_OPTIONS: ThemeOption[] = [
   {
     id: 'DARK',
     titleEn: 'Dark',
-    titleHi: 'रात / मंडी',
-    subtitleEn: 'Night Mandi & OLED',
-    subtitleHi: 'रात में कम चमक व बैटरी बचत',
+    titleHi: 'रात / डार्क',
+    subtitleEn: 'Night & Low Light',
+    subtitleHi: 'रात व कम रोशनी हेतु',
     icon: 'weather-night',
     iconColor: '#38bdf8',
-    iconBg: '#0c4a6e',
-    description: 'Deep low-glare dark theme',
+    iconBg: '#0f172a',
+    description: 'Deep contrast to save battery at night',
   },
 ];
 
 export default function ThemeSwitcher({
-  language = 'en',
+  language: propLanguage,
   compactIconOnly = false,
   onThemeChanged,
   style,
 }: ThemeSwitcherProps) {
   const { theme, themeMode, setThemeMode } = useTheme();
+  const { language: ctxLanguage } = useLanguage();
+  const language = propLanguage || ctxLanguage;
   const [isOpen, setIsOpen] = useState(false);
   const [buttonLayout, setButtonLayout] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
   

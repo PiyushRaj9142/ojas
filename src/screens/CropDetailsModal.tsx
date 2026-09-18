@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
+import { useLanguage } from '../i18n/LanguageContext';
 import { CropItem } from '../types/crop';
 import StatusBadge from '../components/StatusBadge';
 
@@ -18,6 +20,8 @@ export default function CropDetailsModal({
   onClose,
   onDispatchCrop,
 }: CropDetailsModalProps) {
+  const { theme } = useTheme();
+  const { language, t } = useLanguage();
   if (!crop) return null;
 
   const handleDispatch = () => {
@@ -43,19 +47,19 @@ export default function CropDetailsModal({
       <View style={styles.modalOverlay}>
         <View style={styles.sheetCard}>
           {/* Header */}
-          <View style={styles.header}>
+          <View style={[styles.header, { borderBottomColor: theme.border }]}>
             <View style={styles.headerLeft}>
               <View style={[styles.emojiCircle, { backgroundColor: `${crop.color}15` }]}>
                 <Text style={styles.emoji}>{crop.iconEmoji}</Text>
               </View>
               <View>
-                <Text style={styles.title}>{crop.name}</Text>
-                <Text style={styles.category}>{crop.category}</Text>
+                <Text style={[styles.title, { color: theme.textPrimary }]}>{language !== 'en' && crop.nameHi ? crop.nameHi : crop.name}</Text>
+                <Text style={[styles.category, { color: theme.textMuted }]}>{crop.category}</Text>
               </View>
             </View>
 
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-              <Ionicons name="close" size={22} color={colors.textSecondary} />
+              <Ionicons name="close" size={22} color={theme.textSecondary} />
             </TouchableOpacity>
           </View>
 
@@ -63,24 +67,24 @@ export default function CropDetailsModal({
             {/* Status & Freshness Header Banner */}
             <View style={styles.statusRow}>
               <StatusBadge status={crop.status} />
-              <Text style={styles.dateLabel}>Stored: {crop.storageDate}</Text>
+              <Text style={[styles.dateLabel, { color: theme.textMuted }]}>{crop.storageDate}</Text>
             </View>
 
             {/* Freshness Bar */}
-            <View style={styles.freshnessBox}>
+            <View style={[styles.freshnessBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
               <View style={styles.freshnessHeader}>
-                <Text style={styles.freshnessTitle}>Freshness Index</Text>
-                <Text style={[styles.freshnessScore, { color: crop.freshnessPercentage >= 80 ? colors.success : colors.warning }]}>
+                <Text style={[styles.freshnessTitle, { color: theme.textPrimary }]}>{t('freshnessIndex', 'Freshness Index')}</Text>
+                <Text style={[styles.freshnessScore, { color: crop.freshnessPercentage >= 80 ? theme.success : theme.warning }]}>
                   {crop.freshnessPercentage}%
                 </Text>
               </View>
-              <View style={styles.progressBg}>
+              <View style={[styles.progressBg, { backgroundColor: theme.backgroundSubtle }]}>
                 <View
                   style={[
                     styles.progressFill,
                     {
                       width: `${crop.freshnessPercentage}%`,
-                      backgroundColor: crop.freshnessPercentage >= 80 ? colors.success : colors.warning,
+                      backgroundColor: crop.freshnessPercentage >= 80 ? theme.success : theme.warning,
                     },
                   ]}
                 />
@@ -89,50 +93,52 @@ export default function CropDetailsModal({
 
             {/* 6 Key Crop Health Diagnostic Tiles */}
             <View style={styles.grid}>
-              <View style={styles.tile}>
-                <Text style={styles.tileLabel}>Quantity Stored</Text>
-                <Text style={styles.tileValue}>{crop.quantity} {crop.unit}</Text>
+              <View style={[styles.tile, { backgroundColor: theme.backgroundSubtle, borderColor: theme.border }]}>
+                <Text style={[styles.tileLabel, { color: theme.textMuted }]}>{t('quantity', 'Quantity Stored')}</Text>
+                <Text style={[styles.tileValue, { color: theme.textPrimary }]}>{crop.quantity} {crop.unit}</Text>
               </View>
 
-              <View style={styles.tile}>
-                <Text style={styles.tileLabel}>Est. Shelf Life</Text>
-                <Text style={[styles.tileValue, { color: colors.secondary }]}>{crop.shelfLifeDays} Days</Text>
+              <View style={[styles.tile, { backgroundColor: theme.backgroundSubtle, borderColor: theme.border }]}>
+                <Text style={[styles.tileLabel, { color: theme.textMuted }]}>{t('shelfLife', 'Est. Shelf Life')}</Text>
+                <Text style={[styles.tileValue, { color: theme.secondary }]}>{crop.shelfLifeDays} {t('daysRemaining', 'Days')}</Text>
               </View>
 
-              <View style={styles.tile}>
-                <Text style={styles.tileLabel}>Storage Temp</Text>
-                <Text style={styles.tileValue}>{crop.currentTemp}°C</Text>
+              <View style={[styles.tile, { backgroundColor: theme.backgroundSubtle, borderColor: theme.border }]}>
+                <Text style={[styles.tileLabel, { color: theme.textMuted }]}>{t('storageTemp', 'Storage Temp')}</Text>
+                <Text style={[styles.tileValue, { color: theme.textPrimary }]}>{crop.currentTemp}°C</Text>
               </View>
 
-              <View style={styles.tile}>
-                <Text style={styles.tileLabel}>Relative Humidity</Text>
-                <Text style={styles.tileValue}>{crop.currentHumidity}%</Text>
+              <View style={[styles.tile, { backgroundColor: theme.backgroundSubtle, borderColor: theme.border }]}>
+                <Text style={[styles.tileLabel, { color: theme.textMuted }]}>{t('relHumidity', 'Relative Humidity')}</Text>
+                <Text style={[styles.tileValue, { color: theme.textPrimary }]}>{crop.currentHumidity}%</Text>
               </View>
 
-              <View style={styles.tile}>
-                <Text style={styles.tileLabel}>Expected Loss</Text>
-                <Text style={[styles.tileValue, { color: colors.primary }]}>{crop.expectedLossPercentage}% (Low)</Text>
+              <View style={[styles.tile, { backgroundColor: theme.backgroundSubtle, borderColor: theme.border }]}>
+                <Text style={[styles.tileLabel, { color: theme.textMuted }]}>{t('expectedLoss', 'Expected Loss')}</Text>
+                <Text style={[styles.tileValue, { color: theme.primary }]}>{crop.expectedLossPercentage}% ({t('lowLoss', 'Low')})</Text>
               </View>
 
-              <View style={styles.tile}>
-                <Text style={styles.tileLabel}>Est. Market Value</Text>
-                <Text style={[styles.tileValue, { color: colors.textPrimary }]}>₹{crop.estimatedTotalMarketValue}</Text>
+              <View style={[styles.tile, { backgroundColor: theme.backgroundSubtle, borderColor: theme.border }]}>
+                <Text style={[styles.tileLabel, { color: theme.textMuted }]}>{t('estimatedValue', 'Est. Market Value')}</Text>
+                <Text style={[styles.tileValue, { color: theme.textPrimary }]}>₹{crop.estimatedTotalMarketValue}</Text>
               </View>
             </View>
 
             {/* AI Recommendation Message Card */}
-            <View style={styles.aiBox}>
+            <View style={[styles.aiBox, { backgroundColor: theme.primaryLight, borderColor: theme.primary }]}>
               <View style={styles.aiHeader}>
-                <MaterialCommunityIcons name="robot" size={16} color={colors.primary} />
-                <Text style={styles.aiTitle}>AI Agronomist Selling Recommendation</Text>
+                <MaterialCommunityIcons name="robot" size={16} color={theme.primary} />
+                <Text style={[styles.aiTitle, { color: theme.primaryDark }]}>{t('aiAgroSellingRec', 'AI Agronomist Selling Recommendation')}</Text>
               </View>
-              <Text style={styles.aiDesc}>{crop.aiRecommendation}</Text>
+              <Text style={[styles.aiDesc, { color: theme.textPrimary }]}>
+                {language !== 'en' && crop.aiRecommendationHi ? crop.aiRecommendationHi : crop.aiRecommendation}
+              </Text>
             </View>
 
             {/* Dispatch Button */}
-            <TouchableOpacity style={styles.dispatchBtn} onPress={handleDispatch} activeOpacity={0.85}>
+            <TouchableOpacity style={[styles.dispatchBtn, { backgroundColor: theme.primary }]} onPress={handleDispatch} activeOpacity={0.85}>
               <MaterialCommunityIcons name="truck-delivery" size={18} color="#ffffff" />
-              <Text style={styles.dispatchText}>Dispatch Harvest for Sale</Text>
+              <Text style={styles.dispatchText}>{t('dispatchForSale', 'Dispatch Harvest for Sale')}</Text>
             </TouchableOpacity>
           </ScrollView>
         </View>

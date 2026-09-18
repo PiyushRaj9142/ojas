@@ -10,6 +10,7 @@ import {
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { AppNotification, NotificationPriority, NotificationType } from '../types/notification';
 import { useTheme } from '../theme/ThemeContext';
+import { useLanguage } from '../i18n/LanguageContext';
 import { LanguageCode } from '../types/user';
 
 interface NotificationDropdownProps {
@@ -33,9 +34,11 @@ export default function NotificationDropdown({
   onClearAll,
   onClose,
   onViewAllAlerts,
-  language = 'en',
+  language: propLanguage,
 }: NotificationDropdownProps) {
   const { theme, themeMode } = useTheme();
+  const { language: ctxLanguage, t } = useLanguage();
+  const language = propLanguage || ctxLanguage;
   const [filter, setFilter] = useState<'ALL' | 'ALERTS' | 'INFO'>('ALL');
 
   const filtered = notifications.filter((n) => {
@@ -54,26 +57,26 @@ export default function NotificationDropdown({
       const diffHours = Math.floor(diffMins / 60);
       const diffDays = Math.floor(diffHours / 24);
 
-      if (diffSecs < 60) return language === 'hi' ? 'अभी-अभी' : 'Just now';
-      if (diffMins < 60) return language === 'hi' ? `${diffMins} मिनट पहले` : `${diffMins}m ago`;
-      if (diffHours < 24) return language === 'hi' ? `${diffHours} घंटे पहले` : `${diffHours}h ago`;
-      return language === 'hi' ? `${diffDays} दिन पहले` : `${diffDays}d ago`;
+      if (diffSecs < 60) return t('justNow', 'Just now');
+      if (diffMins < 60) return `${diffMins} ${t('minsAgo', 'm ago')}`;
+      if (diffHours < 24) return `${diffHours} ${t('hoursAgo', 'h ago')}`;
+      return `${diffDays} ${t('daysAgo', 'd ago')}`;
     } catch {
-      return 'Recently';
+      return t('justNow', 'Recently');
     }
   };
 
   const getPriorityBadge = (priority: NotificationPriority) => {
     switch (priority) {
       case 'HIGH':
-        return { label: 'HIGH', color: theme.danger, bg: theme.dangerLight };
+        return { label: t('highPriority', 'HIGH'), color: theme.danger, bg: theme.dangerLight };
       case 'MEDIUM':
-        return { label: 'MED', color: theme.warning, bg: theme.warningLight };
+        return { label: t('mediumPriority', 'MED'), color: theme.warning, bg: theme.warningLight };
       case 'LOW':
-        return { label: 'LOW', color: theme.primary, bg: theme.primaryLight };
+        return { label: t('lowPriority', 'LOW'), color: theme.primary, bg: theme.primaryLight };
       case 'INFO':
       default:
-        return { label: 'INFO', color: theme.secondary, bg: theme.secondaryLight };
+        return { label: t('filterInfo', 'INFO'), color: theme.secondary, bg: theme.secondaryLight };
     }
   };
 
@@ -112,12 +115,12 @@ export default function NotificationDropdown({
       <View style={[styles.header, { borderBottomColor: theme.border }]}>
         <View style={styles.headerLeft}>
           <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>
-            {language === 'hi' ? 'सूचनाएं' : 'Notifications'}
+            {t('notifications', 'Notifications')}
           </Text>
           {unreadCount > 0 && (
             <View style={[styles.unreadCountBadge, { backgroundColor: theme.dangerLight }]}>
               <Text style={[styles.unreadCountText, { color: theme.danger }]}>
-                {unreadCount} {language === 'hi' ? 'नई' : 'new'}
+                {unreadCount} {t('newBadge', 'new')}
               </Text>
             </View>
           )}
@@ -131,7 +134,7 @@ export default function NotificationDropdown({
               activeOpacity={0.7}
             >
               <Text style={[styles.markAllText, { color: theme.primaryDark }]}>
-                {language === 'hi' ? 'सभी पढ़ें' : 'Mark all read'}
+                {t('markAllRead', 'Mark all read')}
               </Text>
             </TouchableOpacity>
           )}
@@ -156,7 +159,7 @@ export default function NotificationDropdown({
               { color: filter === 'ALL' ? theme.primaryDark : theme.textMuted },
             ]}
           >
-            {language === 'hi' ? 'सभी' : 'All'} ({notifications.length})
+            {t('filterAll', 'All')} ({notifications.length})
           </Text>
         </TouchableOpacity>
 
@@ -173,7 +176,7 @@ export default function NotificationDropdown({
               { color: filter === 'ALERTS' ? theme.danger : theme.textMuted },
             ]}
           >
-            🔴 {language === 'hi' ? 'अलर्ट्स' : 'Alerts'}
+            🔴 {t('navAlerts', 'Alerts')}
           </Text>
         </TouchableOpacity>
 
@@ -190,7 +193,7 @@ export default function NotificationDropdown({
               { color: filter === 'INFO' ? theme.secondaryDark : theme.textMuted },
             ]}
           >
-            ℹ️ {language === 'hi' ? 'सिस्टम' : 'System'}
+            ℹ️ {t('filterSystem', 'System')}
           </Text>
         </TouchableOpacity>
       </View>

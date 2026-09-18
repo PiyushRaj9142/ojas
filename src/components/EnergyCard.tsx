@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeContext';
+import { useLanguage } from '../i18n/LanguageContext';
 import EnergyFlow from './EnergyFlow';
 
 interface EnergyCardProps {
@@ -20,6 +21,7 @@ export default function EnergyCard({
   onPressDetails,
 }: EnergyCardProps) {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const isCharging = availableKw >= 0;
 
   return (
@@ -31,8 +33,8 @@ export default function EnergyCard({
             <MaterialCommunityIcons name="lightning-bolt" size={18} color={theme.secondary} />
           </View>
           <View>
-            <Text style={[styles.title, { color: theme.textPrimary }]}>Energy System</Text>
-            <Text style={[styles.subtitle, { color: theme.textMuted }]}>VAWT Wind & Hybrid Storage</Text>
+            <Text style={[styles.title, { color: theme.textPrimary }]}>{t('energySystem', 'Energy System')}</Text>
+            <Text style={[styles.subtitle, { color: theme.textMuted }]}>{t('vawtAndStorage', 'VAWT Wind & Hybrid Storage')}</Text>
           </View>
         </View>
 
@@ -42,7 +44,7 @@ export default function EnergyCard({
             onPress={onPressDetails}
             activeOpacity={0.7}
           >
-            <Text style={[styles.detailsText, { color: theme.secondary }]}>Manage</Text>
+            <Text style={[styles.detailsText, { color: theme.secondary }]}>{t('manage', 'Manage')}</Text>
             <Feather name="chevron-right" size={14} color={theme.secondary} />
           </TouchableOpacity>
         )}
@@ -51,28 +53,28 @@ export default function EnergyCard({
       {/* 4 Energy Metrics Grid */}
       <View style={[styles.metricsGrid, { backgroundColor: theme.backgroundSubtle }]}>
         <View style={styles.metricItem}>
-          <Text style={[styles.metricLabel, { color: theme.textMuted }]}>Wind Gen</Text>
+          <Text style={[styles.metricLabel, { color: theme.textMuted }]}>{t('windGen', 'Wind Gen')}</Text>
           <Text style={[styles.metricValue, { color: theme.secondary }]}>
             {windGenerationKw.toFixed(1)} <Text style={[styles.metricUnit, { color: theme.textMuted }]}>kW</Text>
           </Text>
         </View>
 
         <View style={styles.metricItem}>
-          <Text style={[styles.metricLabel, { color: theme.textMuted }]}>Battery SOC</Text>
+          <Text style={[styles.metricLabel, { color: theme.textMuted }]}>{t('batterySocShort', 'Battery SOC')}</Text>
           <Text style={[styles.metricValue, { color: theme.primary }]}>
             {batteryLevel}%
           </Text>
         </View>
 
         <View style={styles.metricItem}>
-          <Text style={[styles.metricLabel, { color: theme.textMuted }]}>Load</Text>
+          <Text style={[styles.metricLabel, { color: theme.textMuted }]}>{t('load', 'Load')}</Text>
           <Text style={[styles.metricValue, { color: theme.textPrimary }]}>
             {consumptionKw.toFixed(1)} <Text style={[styles.metricUnit, { color: theme.textMuted }]}>kW</Text>
           </Text>
         </View>
 
         <View style={styles.metricItem}>
-          <Text style={[styles.metricLabel, { color: theme.textMuted }]}>Net Power</Text>
+          <Text style={[styles.metricLabel, { color: theme.textMuted }]}>{t('netPower', 'Net Power')}</Text>
           <Text style={[styles.metricValue, { color: isCharging ? theme.success : theme.warning }]}>
             {availableKw > 0 ? `+${availableKw.toFixed(1)}` : availableKw.toFixed(1)} <Text style={[styles.metricUnit, { color: theme.textMuted }]}>kW</Text>
           </Text>

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
+import { useLanguage } from '../i18n/LanguageContext';
 import { SensorTelemetry } from '../types/sensor';
 import StorageVisualization from '../components/StorageVisualization';
 import StatusBadge from '../components/StatusBadge';
@@ -15,8 +17,12 @@ interface ColdStorageScreenProps {
 export default function ColdStorageScreen({
   telemetry,
   onTriggerTurbo,
-  language = 'en',
+  language: propLanguage,
 }: ColdStorageScreenProps) {
+  const { theme } = useTheme();
+  const { language: ctxLanguage, t } = useLanguage();
+  const language = propLanguage || ctxLanguage;
+
   const [targetTemp, setTargetTemp] = useState(4.5);
   const [ventMode, setVentMode] = useState<'ECO' | 'NORMAL' | 'BOOST'>('NORMAL');
 
@@ -30,46 +36,46 @@ export default function ColdStorageScreen({
   const sections = [
     {
       id: 'env',
-      title: '1. Environment Monitoring',
+      title: t('envMonitoring', '1. Environment Monitoring'),
       icon: 'weather-dust',
       items: [
-        { label: 'Core Chamber Temp', value: `${telemetry.temperature.toFixed(1)}°C`, status: 'OPTIMAL' as const },
-        { label: 'Relative Humidity', value: `${telemetry.humidity}%`, status: 'NORMAL' as const },
-        { label: 'Ethylene Gas (C₂H₄)', value: `${telemetry.ethylenePpm} ppm`, status: 'OPTIMAL' as const },
-        { label: 'Ambient Temperature', value: '31.4°C (Farm Exterior)', status: 'NORMAL' as const },
+        { label: t('coreTemp', 'Core Chamber Temp'), value: `${telemetry.temperature.toFixed(1)}°C`, status: 'OPTIMAL' as const },
+        { label: t('relHumidity', 'Relative Humidity'), value: `${telemetry.humidity}%`, status: 'NORMAL' as const },
+        { label: t('ethyleneLevel', 'Ethylene Gas (C₂H₄)'), value: `${telemetry.ethylenePpm} ppm`, status: 'OPTIMAL' as const },
+        { label: t('ambientTemp', 'Ambient Temperature'), value: '31.4°C', status: 'NORMAL' as const },
       ],
     },
     {
       id: 'cooling',
-      title: '2. Cooling & Compressor Subsystem',
+      title: t('coolingSubsystem', '2. Cooling & Compressor Subsystem'),
       icon: 'snowflake',
       items: [
-        { label: 'Compressor State', value: telemetry.coolingCompressorState, status: 'OPTIMAL' as const },
-        { label: 'Refrigeration Load', value: `${telemetry.powerConsumptionKw} kW`, status: 'NORMAL' as const },
-        { label: 'Evaporator Fan Speed', value: ventMode === 'BOOST' ? '100% (High)' : '65% (Normal)', status: 'OPTIMAL' as const },
-        { label: 'Defrost Cycle', value: 'Auto (Every 6h)', status: 'NORMAL' as const },
+        { label: t('coolingStatus', 'Compressor State'), value: telemetry.coolingCompressorState, status: 'OPTIMAL' as const },
+        { label: t('powerConsumption', 'Refrigeration Load'), value: `${telemetry.powerConsumptionKw} kW`, status: 'NORMAL' as const },
+        { label: t('airflowRate', 'Evaporator Fan Speed'), value: ventMode === 'BOOST' ? '100% (High)' : '65% (Normal)', status: 'OPTIMAL' as const },
+        { label: t('defrostCycle', 'Defrost Cycle'), value: 'Auto (6h)', status: 'NORMAL' as const },
       ],
     },
     {
       id: 'energy',
-      title: '3. Hybrid Clean Energy Link',
+      title: t('cleanEnergyLink', '3. Hybrid Clean Energy Link'),
       icon: 'wind-turbine',
       items: [
-        { label: 'Wind Power Generation', value: `${telemetry.windGenerationKw} kW`, status: 'OPTIMAL' as const },
-        { label: 'Battery Reserve (SOC)', value: `${telemetry.batteryLevel}%`, status: 'OPTIMAL' as const },
-        { label: 'Grid Dependency', value: '0% (100% Off-Grid)', status: 'OPTIMAL' as const },
-        { label: 'Autonomous Backup', value: '36.5 Hours', status: 'OPTIMAL' as const },
+        { label: t('windGeneration', 'Wind Power Generation'), value: `${telemetry.windGenerationKw} kW`, status: 'OPTIMAL' as const },
+        { label: t('batterySoc', 'Battery Reserve (SOC)'), value: `${telemetry.batteryLevel}%`, status: 'OPTIMAL' as const },
+        { label: t('gridIndependence', 'Grid Dependency'), value: '0% (100% Off-Grid)', status: 'OPTIMAL' as const },
+        { label: t('autonomousBackup', 'Autonomous Backup'), value: '36.5 Hours', status: 'OPTIMAL' as const },
       ],
     },
     {
       id: 'health',
-      title: '4. System Structural Health',
+      title: t('systemHealthSec', '4. System Structural Health'),
       icon: 'shield-check',
       items: [
-        { label: 'Insulation Integrity', value: '100mm PUF (Optimal)', status: 'OPTIMAL' as const },
-        { label: 'Door Seal Gasket', value: 'Closed & Sealed', status: 'OPTIMAL' as const },
-        { label: 'IoT Sensor Link', value: '6/6 Online (99.9% Uptime)', status: 'OPTIMAL' as const },
-        { label: 'Firmware Version', value: 'v2.4.1 Hybrid Off-Grid', status: 'NORMAL' as const },
+        { label: t('insulation', 'Insulation Integrity'), value: '100mm PUF (Optimal)', status: 'OPTIMAL' as const },
+        { label: t('doorSeal', 'Door Seal Gasket'), value: 'Closed & Sealed', status: 'OPTIMAL' as const },
+        { label: t('sensorMeshOnline', 'IoT Sensor Mesh'), value: '6/6 Online (99.9%)', status: 'OPTIMAL' as const },
+        { label: t('systemSafe', 'Firmware Version'), value: 'v2.4.1 Hybrid Off-Grid', status: 'NORMAL' as const },
       ],
     },
   ];
@@ -84,18 +90,18 @@ export default function ColdStorageScreen({
       <View style={styles.setpointCard}>
         <View style={styles.setpointHeader}>
           <View>
-            <Text style={styles.setpointSub}>COLD STORAGE CONTROLLER</Text>
-            <Text style={styles.setpointTitle}>Chamber Setpoint</Text>
+            <Text style={styles.setpointSub}>{t('appName', 'COLD STORAGE CONTROLLER')}</Text>
+            <Text style={styles.setpointTitle}>{t('chamberSetpoint', 'Chamber Setpoint')}</Text>
           </View>
           <View style={styles.currentTempBadge}>
-            <Text style={styles.currentTempLabel}>Live:</Text>
+            <Text style={styles.currentTempLabel}>{t('liveTemp', 'Live:')}</Text>
             <Text style={styles.currentTempValue}>{telemetry.temperature.toFixed(1)}°C</Text>
           </View>
         </View>
 
         <View style={styles.targetAdjusterRow}>
           <View>
-            <Text style={styles.targetLabel}>Target Temperature</Text>
+            <Text style={styles.targetLabel}>{t('targetTemp', 'Target Temperature')}</Text>
             <Text style={styles.targetValue}>{targetTemp.toFixed(1)}°C</Text>
           </View>
 
@@ -123,7 +129,7 @@ export default function ColdStorageScreen({
           activeOpacity={0.85}
         >
           <MaterialCommunityIcons name="rocket-launch" size={16} color="#ffffff" />
-          <Text style={styles.turboBtnText}>Trigger Turbo Cooling Pulldown (2.8°C)</Text>
+          <Text style={styles.turboBtnText}>{t('turboBoost', 'Trigger Turbo Cooling Pulldown (2.8°C)')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -170,7 +176,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 16,
-    paddingBottom: 90,
+    paddingBottom: 120,
   },
   setpointCard: {
     backgroundColor: colors.card,

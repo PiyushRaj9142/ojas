@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal } from 'react-native';
 import { MaterialCommunityIcons, Feather, Ionicons } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
+import { useLanguage } from '../i18n/LanguageContext';
 import { SensorTelemetry } from '../types/sensor';
 
 interface DigitalTwinViewProps {
@@ -9,6 +11,8 @@ interface DigitalTwinViewProps {
 }
 
 export default function DigitalTwinView({ telemetry }: DigitalTwinViewProps) {
+  const { theme } = useTheme();
+  const { language, t } = useLanguage();
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
   const [activeLayer, setActiveLayer] = useState<'ALL' | 'ENERGY' | 'THERMAL' | 'CROPS'>('ALL');
 
@@ -130,39 +134,53 @@ export default function DigitalTwinView({ telemetry }: DigitalTwinViewProps) {
     <View style={styles.container}>
       {/* Interactive Layer Filter Chips */}
       <View style={styles.layerSelector}>
-        {(['ALL', 'ENERGY', 'THERMAL', 'CROPS'] as const).map((layer) => (
+        {[
+          { id: 'ALL' as const, label: t('layersAll', '360° System') },
+          { id: 'ENERGY' as const, label: t('layersEnergy', '⚡ Energy Link') },
+          { id: 'THERMAL' as const, label: t('layersThermal', '❄️ Thermal Core') },
+          { id: 'CROPS' as const, label: t('layersCrops', '📦 Crop Racks') },
+        ].map((layer) => (
           <TouchableOpacity
-            key={layer}
-            style={[styles.layerChip, activeLayer === layer && styles.layerChipActive]}
-            onPress={() => setActiveLayer(layer)}
+            key={layer.id}
+            style={[
+              styles.layerChip,
+              { backgroundColor: theme.card, borderColor: theme.border },
+              activeLayer === layer.id && { backgroundColor: theme.primaryLight, borderColor: theme.primary },
+            ]}
+            onPress={() => setActiveLayer(layer.id)}
           >
-            <Text style={[styles.layerChipText, activeLayer === layer && styles.layerChipTextActive]}>
-              {layer === 'ALL' ? '360° System' : `${layer} Layer`}
+            <Text style={[
+              styles.layerChipText,
+              { color: theme.textSecondary },
+              activeLayer === layer.id && { color: theme.primaryDark, fontWeight: '700' },
+            ]}>
+              {layer.label}
             </Text>
           </TouchableOpacity>
         ))}
       </View>
 
       {/* 2.5D Digital Twin Schematic Visual Canvas */}
-      <View style={styles.twinCanvas}>
+      <View style={[styles.twinCanvas, { backgroundColor: theme.card, borderColor: theme.border }]}>
         <View style={styles.canvasHeader}>
           <View style={styles.liveIndicator}>
             <View style={styles.liveDot} />
-            <Text style={styles.liveText}>DIGITAL TWIN LIVE TELEMETRY</Text>
+            <Text style={[styles.liveText, { color: theme.primaryDark }]}>{t('statusOnline', 'ONLINE')} • {t('digitalTwinTitle', 'DIGITAL TWIN')}</Text>
           </View>
-          <Text style={styles.tapPrompt}>Tap component to inspect</Text>
+          <Text style={[styles.tapPrompt, { color: theme.textMuted }]}>{t('inspectTelemetry', 'Tap component to inspect')}</Text>
         </View>
 
         {/* 2.5D Node Explorer Grid */}
         <View style={styles.twinGrid}>
           {components.map((comp) => {
             const isDimmed = activeLayer !== 'ALL' && comp.category !== activeLayer;
+            const displayName = language !== 'en' && comp.nameHi ? comp.nameHi : comp.name.split('(')[0];
             return (
               <TouchableOpacity
                 key={comp.id}
                 style={[
                   styles.twinCard,
-                  { borderColor: comp.color },
+                  { backgroundColor: theme.backgroundSubtle, borderColor: comp.color },
                   isDimmed && styles.twinCardDimmed,
                 ]}
                 onPress={() => setSelectedComponent(comp.id)}
@@ -171,9 +189,9 @@ export default function DigitalTwinView({ telemetry }: DigitalTwinViewProps) {
                 <View style={[styles.compIconCircle, { backgroundColor: `${comp.color}18` }]}>
                   <MaterialCommunityIcons name={comp.icon as any} size={22} color={comp.color} />
                 </View>
-                <Text style={styles.compCardName} numberOfLines={1}>{comp.name.split('(')[0]}</Text>
+                <Text style={[styles.compCardName, { color: theme.textPrimary }]} numberOfLines={1}>{displayName}</Text>
                 <Text style={[styles.compCardSummary, { color: comp.color }]} numberOfLines={1}>{comp.summary}</Text>
-                <View style={styles.statusPill}>
+                <View style={[styles.statusPill, { backgroundColor: `${comp.color}15` }]}>
                   <Text style={[styles.statusPillText, { color: comp.color }]}>{comp.status}</Text>
                 </View>
               </TouchableOpacity>

@@ -2,98 +2,105 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
+import { useLanguage } from '../i18n/LanguageContext';
 
 export default function RecommendationsScreen() {
+  const { theme } = useTheme();
+  const { language, t } = useLanguage();
+
   const recommendations = [
     {
       id: '1',
       priority: 'HIGH' as const,
       icon: 'fruit-cherries',
-      title: '🥕 Sell Cauliflower & Carrots Soon',
-      description: 'Cauliflower has 6 days remaining and showing slight moisture loss. Sell within 3-4 days to prevent weight reduction.',
-      impact: '+₹2,400 Profit Protected',
-      color: colors.warning,
+      title: t('recSellCauliflowerTitle', '🥕 Sell Cauliflower & Carrots Soon'),
+      description: t('recSellCauliflowerDesc', 'Cauliflower has 6 days remaining and showing slight moisture loss. Sell within 3-4 days to prevent weight reduction.'),
+      impact: t('recSellCauliflowerImpact', '+₹2,400 Profit Protected'),
+      color: theme.warning,
     },
     {
       id: '2',
       priority: 'MEDIUM' as const,
       icon: 'package-variant-closed',
-      title: '📦 Storage Capacity Available',
-      description: 'Storage capacity is currently 68% (342 kg). You can safely store approximately 158 kg more harvest across Zone A & C.',
-      impact: '158 kg Space Open',
-      color: colors.secondary,
+      title: t('recStorageCapTitle', '📦 Storage Capacity Available'),
+      description: t('recStorageCapDesc', 'Storage capacity is currently 68% (342 kg). You can safely store approximately 158 kg more harvest across Zone A & C.'),
+      impact: t('recStorageCapImpact', '158 kg Space Open'),
+      color: theme.secondary,
     },
     {
       id: '3',
       priority: 'LOW' as const,
       icon: 'wind-turbine',
-      title: '🌬 Peak Wind Generation Window',
-      description: 'Wind velocity expected to remain above 8 m/s for next 18 hours. Ideal window for pre-cooling new incoming harvest.',
-      impact: '100% Free Energy',
-      color: colors.primary,
+      title: t('recWindCleanTitle', '🌬 Peak Clean Energy Window'),
+      description: t('recWindCleanDesc', 'Wind velocity expected to remain above 8 m/s for next 18 hours. Ideal window for pre-cooling new incoming harvest.'),
+      impact: t('recWindCleanImpact', '100% Free Energy'),
+      color: theme.primary,
     },
     {
       id: '4',
       priority: 'LOW' as const,
       icon: 'battery-charging-90',
-      title: '🔋 Battery Storage Fully Autonomous',
-      description: 'Battery state of charge is 82% (48.4V). Sufficient for 36+ hours of uninterrupted cooling in case of wind lulls.',
-      impact: 'Zero Grid Risk',
-      color: colors.primary,
+      title: t('recBatteryAutoTitle', '🔋 Battery Storage Fully Autonomous'),
+      description: t('recBatteryAutoDesc', 'Battery state of charge is 84% (48.4V). Sufficient for 18+ hours of uninterrupted cooling in case of wind lulls.'),
+      impact: t('recBatteryAutoImpact', 'Zero Grid Risk'),
+      color: theme.primary,
     },
   ];
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: theme.background }]}
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
     >
-      <View style={styles.header}>
-        <MaterialCommunityIcons name="lightbulb-on" size={24} color={colors.warning} />
+      <View style={[styles.header, { backgroundColor: theme.card, borderColor: theme.border }]}>
+        <MaterialCommunityIcons name="lightbulb-on" size={24} color={theme.warning} />
         <View style={styles.headerTextBlock}>
-          <Text style={styles.headerTitle}>Smart Recommendations</Text>
-          <Text style={styles.headerSub}>AI Agronomist & Cold Chain Advisory</Text>
+          <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>
+            {t('smartRecommendations', 'Smart Recommendations')}
+          </Text>
+          <Text style={[styles.headerSub, { color: theme.textMuted }]}>{t('agroAdvisorySub', 'AI Agronomist & Cold Chain Advisory')}</Text>
         </View>
       </View>
 
       <View style={styles.list}>
         {recommendations.map((rec) => (
-          <View key={rec.id} style={styles.card}>
+          <View key={rec.id} style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
             <View style={styles.cardTop}>
               <View style={styles.titleRow}>
                 <View style={[styles.iconCircle, { backgroundColor: `${rec.color}15` }]}>
                   <MaterialCommunityIcons name={rec.icon as any} size={20} color={rec.color} />
                 </View>
-                <Text style={styles.title}>{rec.title}</Text>
+                <Text style={[styles.title, { color: theme.textPrimary }]}>{rec.title}</Text>
               </View>
 
               <View
                 style={[
                   styles.priorityPill,
-                  rec.priority === 'HIGH' && styles.priorityHigh,
-                  rec.priority === 'MEDIUM' && styles.priorityMed,
-                  rec.priority === 'LOW' && styles.priorityLow,
+                  rec.priority === 'HIGH' && { backgroundColor: theme.dangerLight },
+                  rec.priority === 'MEDIUM' && { backgroundColor: theme.warningLight },
+                  rec.priority === 'LOW' && { backgroundColor: theme.primaryLight },
                 ]}
               >
                 <Text
                   style={[
                     styles.priorityText,
-                    rec.priority === 'HIGH' && { color: colors.danger },
-                    rec.priority === 'MEDIUM' && { color: colors.warning },
-                    rec.priority === 'LOW' && { color: colors.primary },
+                    rec.priority === 'HIGH' && { color: theme.danger },
+                    rec.priority === 'MEDIUM' && { color: theme.warning },
+                    rec.priority === 'LOW' && { color: theme.primaryDark },
                   ]}
                 >
-                  {rec.priority} PRIORITY
+                  {rec.priority === 'HIGH' ? t('highPriority', 'HIGH PRIORITY') : rec.priority === 'MEDIUM' ? t('mediumPriority', 'MEDIUM PRIORITY') : t('lowPriority', 'LOW PRIORITY')}
                 </Text>
               </View>
             </View>
 
-            <Text style={styles.desc}>{rec.description}</Text>
+            <Text style={[styles.desc, { color: theme.textSecondary }]}>{rec.description}</Text>
 
             <View style={styles.impactRow}>
-              <MaterialCommunityIcons name="check-decagram" size={14} color={colors.primary} />
-              <Text style={styles.impactText}>Benefit: {rec.impact}</Text>
+              <MaterialCommunityIcons name="check-decagram" size={14} color={theme.primary} />
+              <Text style={[styles.impactText, { color: theme.primaryDark }]}>{t('benefit', 'Benefit')}: {rec.impact}</Text>
             </View>
           </View>
         ))}
@@ -109,7 +116,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 16,
-    paddingBottom: 90,
+    paddingBottom: 120,
   },
   header: {
     flexDirection: 'row',

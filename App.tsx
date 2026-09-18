@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 
 import { colors } from './src/theme/colors';
 import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
+import { LanguageProvider, useLanguage } from './src/i18n/LanguageContext';
 import { UserProfile, LanguageCode } from './src/types/user';
 import { useSensors } from './src/hooks/useSensors';
 import { useInventory } from './src/hooks/useInventory';
@@ -35,11 +36,12 @@ import ProfileScreen from './src/screens/ProfileScreen';
 
 export function MainApp() {
   const { theme } = useTheme();
+  const { language, setLanguage, cycleLanguage } = useLanguage();
 
   // App Phase State
   const [isSplash, setIsSplash] = useState(true);
   const [isOnboarding, setIsOnboarding] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   // Active Screen Routing
   const [activeTab, setActiveTab] = useState<MainTabType>('HOME');
@@ -61,8 +63,13 @@ export function MainApp() {
     darkMode: false,
     themeMode: 'LIGHT',
     demoMode: false,
-    isLoggedIn: true,
+    isLoggedIn: false,
   });
+
+  // Keep user profile language in sync with LanguageContext
+  useEffect(() => {
+    setUser(prev => ({ ...prev, language }));
+  }, [language]);
 
   // Offline Simulation State
   const [isOnline, setIsOnline] = useState(true);
@@ -90,14 +97,12 @@ export function MainApp() {
 
   // Handlers
   const handleSelectLanguage = (lang: LanguageCode) => {
+    setLanguage(lang);
     setUser(prev => ({ ...prev, language: lang }));
   };
 
   const handleCycleLanguage = () => {
-    setUser(prev => ({
-      ...prev,
-      language: prev.language === 'en' ? 'hi' : prev.language === 'hi' ? 'hinglish' : 'en',
-    }));
+    cycleLanguage();
   };
 
   const handleToggleTempUnit = () => {
@@ -129,17 +134,12 @@ export function MainApp() {
       return <OnboardingScreen onFinish={() => setIsOnboarding(false)} />;
     }
 
-    // Phase 3: Login Authentication
+    // Phase 3: Login & Signup Authentication
     if (!isLoggedIn) {
       return (
         <LoginScreen
-          onLoginSuccess={(mob) => {
-            const registered = findUserByPhone(mob);
-            if (registered) {
-              setUser({ ...registered, isLoggedIn: true });
-            } else {
-              setUser(prev => ({ ...prev, mobile: mob, isLoggedIn: true }));
-            }
+          onLoginSuccess={(loggedInUser) => {
+            setUser(loggedInUser);
             setIsLoggedIn(true);
           }}
         />
@@ -163,6 +163,9 @@ export function MainApp() {
           unreadAlertsCount={unreadCount}
           onPressAlerts={() => handleNavigation('ALERTS')}
           onPressSettings={() => handleNavigation('PROFILE')}
+          activeScreen={currentView}
+          onNavigate={handleNavigation}
+          userName={user.name}
         />
 
         {/* Offline Banner */}
@@ -293,9 +296,11 @@ export function MainApp() {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <MainApp />
-    </ThemeProvider>
+    <LanguageProvider>
+      <ThemeProvider>
+        <MainApp />
+      </ThemeProvider>
+    </LanguageProvider>
   );
 }
 

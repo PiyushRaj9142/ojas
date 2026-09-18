@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
+import { useLanguage } from '../i18n/LanguageContext';
 import { StorageAlert, AlertSeverity } from '../types/alert';
 import AlertCard from '../components/AlertCard';
 
@@ -16,6 +18,8 @@ export default function AlertsScreen({
   onMarkAllAsRead,
   onClearAll,
 }: AlertsScreenProps) {
+  const { theme } = useTheme();
+  const { t } = useLanguage();
   const [filter, setFilter] = useState<'ALL' | AlertSeverity>('ALL');
 
   const filteredAlerts = alerts.filter(a => {
@@ -27,7 +31,7 @@ export default function AlertsScreen({
   const warningCount = alerts.filter(a => a.severity === 'WARNING').length;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.contentContainer}
@@ -35,19 +39,19 @@ export default function AlertsScreen({
       >
         {/* Actions Bar */}
         <View style={styles.actionsBar}>
-          <View style={styles.badgeCount}>
-            <Text style={styles.badgeCountText}>{alerts.length} Total Notifications</Text>
+          <View style={[styles.badgeCount, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <Text style={[styles.badgeCountText, { color: theme.textPrimary }]}>{alerts.length} {t('notifications', 'Total Notifications')}</Text>
           </View>
 
           <View style={styles.actionBtnsRow}>
-            <TouchableOpacity onPress={onMarkAllAsRead} style={styles.actionBtn}>
-              <Feather name="check-square" size={13} color={colors.primary} />
-              <Text style={styles.actionBtnText}>Read All</Text>
+            <TouchableOpacity onPress={onMarkAllAsRead} style={[styles.actionBtn, { backgroundColor: theme.primaryLight }]}>
+              <Feather name="check-square" size={13} color={theme.primary} />
+              <Text style={[styles.actionBtnText, { color: theme.primaryDark }]}>{t('markAllRead', 'Read All')}</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={onClearAll} style={styles.actionBtn}>
-              <Feather name="trash-2" size={13} color={colors.danger} />
-              <Text style={[styles.actionBtnText, { color: colors.danger }]}>Clear</Text>
+            <TouchableOpacity onPress={onClearAll} style={[styles.actionBtn, { backgroundColor: theme.dangerLight }]}>
+              <Feather name="trash-2" size={13} color={theme.danger} />
+              <Text style={[styles.actionBtnText, { color: theme.danger }]}>{t('clearAll', 'Clear')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -55,17 +59,25 @@ export default function AlertsScreen({
         {/* Severity Filter Tabs */}
         <View style={styles.filterTabs}>
           {[
-            { id: 'ALL' as const, label: 'All', count: alerts.length },
-            { id: 'CRITICAL' as const, label: 'Critical', count: criticalCount },
-            { id: 'WARNING' as const, label: 'Warning', count: warningCount },
-            { id: 'INFO' as const, label: 'Info', count: alerts.length - criticalCount - warningCount },
+            { id: 'ALL' as const, label: t('filterAll', 'All'), count: alerts.length },
+            { id: 'CRITICAL' as const, label: t('filterCritical', 'Critical'), count: criticalCount },
+            { id: 'WARNING' as const, label: t('filterWarning', 'Warning'), count: warningCount },
+            { id: 'INFO' as const, label: t('filterInfo', 'Info'), count: alerts.length - criticalCount - warningCount },
           ].map((tab) => (
             <TouchableOpacity
               key={tab.id}
-              style={[styles.filterChip, filter === tab.id && styles.filterChipActive]}
+              style={[
+                styles.filterChip,
+                { backgroundColor: theme.card, borderColor: theme.border },
+                filter === tab.id && { backgroundColor: theme.primaryLight, borderColor: theme.primary },
+              ]}
               onPress={() => setFilter(tab.id)}
             >
-              <Text style={[styles.filterChipText, filter === tab.id && styles.filterChipTextActive]}>
+              <Text style={[
+                styles.filterChipText,
+                { color: theme.textSecondary },
+                filter === tab.id && { color: theme.primaryDark, fontWeight: '700' },
+              ]}>
                 {tab.label} ({tab.count})
               </Text>
             </TouchableOpacity>
@@ -79,10 +91,10 @@ export default function AlertsScreen({
               <AlertCard key={alert.id} alert={alert} />
             ))
           ) : (
-            <View style={styles.emptyCard}>
-              <MaterialCommunityIcons name="bell-check-outline" size={48} color={colors.primary} />
-              <Text style={styles.emptyTitle}>All Systems Optimal</Text>
-              <Text style={styles.emptyText}>No active warnings or alerts for your storage.</Text>
+            <View style={[styles.emptyCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+              <MaterialCommunityIcons name="bell-check-outline" size={48} color={theme.primary} />
+              <Text style={[styles.emptyTitle, { color: theme.textPrimary }]}>{t('allSystemsOptimal', 'All Systems Optimal')}</Text>
+              <Text style={[styles.emptyText, { color: theme.textMuted }]}>{t('noActiveAlerts', 'No active warnings or alerts for your storage.')}</Text>
             </View>
           )}
         </View>
@@ -101,7 +113,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 16,
-    paddingBottom: 90,
+    paddingBottom: 120,
   },
   actionsBar: {
     flexDirection: 'row',

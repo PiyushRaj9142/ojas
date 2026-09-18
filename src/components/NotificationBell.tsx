@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeContext';
+import { useLanguage } from '../i18n/LanguageContext';
 import { useNotifications } from '../hooks/useNotifications';
 import NotificationDropdown from './NotificationDropdown';
 import { LanguageCode } from '../types/user';
@@ -21,11 +22,13 @@ interface NotificationBellProps {
 }
 
 export default function NotificationBell({
-  language = 'en',
+  language: propLanguage,
   onViewAllAlerts,
   style,
 }: NotificationBellProps) {
   const { theme } = useTheme();
+  const { language: ctxLanguage } = useLanguage();
+  const language = propLanguage || ctxLanguage;
   const {
     notifications,
     unreadCount,

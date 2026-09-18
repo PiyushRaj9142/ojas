@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, Modal, TextInput, TouchableOpacity, ScrollView,
 import { Ionicons, Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
+import { useLanguage } from '../i18n/LanguageContext';
 import { CropItem } from '../types/crop';
 
 interface AddCropModalProps {
@@ -12,6 +14,8 @@ interface AddCropModalProps {
 }
 
 export default function AddCropModal({ visible, onClose, onAddCrop }: AddCropModalProps) {
+  const { theme } = useTheme();
+  const { language, t } = useLanguage();
   const [cropName, setCropName] = useState('Tomato (Himsona)');
   const [quantity, setQuantity] = useState('50');
   const [unit, setUnit] = useState<'kg' | 'crates' | 'quintal'>('kg');
@@ -69,86 +73,105 @@ export default function AddCropModal({ visible, onClose, onAddCrop }: AddCropMod
   return (
     <Modal visible={visible} transparent={true} animationType="slide" onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
-        <View style={styles.sheetCard}>
-          <View style={styles.header}>
-            <Text style={styles.title}>Add Crop to Storage</Text>
+        <View style={[styles.sheetCard, { backgroundColor: theme.card }]}>
+          <View style={[styles.header, { borderBottomColor: theme.border }]}>
+            <Text style={[styles.title, { color: theme.textPrimary }]}>{t('addCropTitle', 'Add Crop to Storage')}</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-              <Ionicons name="close" size={22} color={colors.textSecondary} />
+              <Ionicons name="close" size={22} color={theme.textSecondary} />
             </TouchableOpacity>
           </View>
 
           <ScrollView style={styles.form} showsVerticalScrollIndicator={false}>
             {/* Quick Crop Selector */}
-            <Text style={styles.label}>Select Crop Type</Text>
+            <Text style={[styles.label, { color: theme.textSecondary }]}>{t('selectCropType', 'Select Crop Type')}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.presetScroll}>
               {presetCrops.map((preset, idx) => (
                 <TouchableOpacity
                   key={idx}
-                  style={[styles.presetChip, cropName === preset.name && styles.presetChipActive]}
+                  style={[
+                    styles.presetChip,
+                    { backgroundColor: theme.backgroundSubtle, borderColor: theme.border },
+                    cropName === preset.name && { backgroundColor: theme.primaryLight, borderColor: theme.primary },
+                  ]}
                   onPress={() => {
                     setCropName(preset.name);
                     setCategory(preset.cat);
                   }}
                 >
                   <Text style={styles.presetEmoji}>{preset.emoji}</Text>
-                  <Text style={[styles.presetText, cropName === preset.name && styles.presetTextActive]}>
+                  <Text style={[
+                    styles.presetText,
+                    { color: theme.textSecondary },
+                    cropName === preset.name && { color: theme.primaryDark, fontWeight: '700' },
+                  ]}>
                     {preset.name.split(' ')[0]}
                   </Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
 
-            <Text style={styles.label}>Crop Name / Commodity</Text>
+            <Text style={[styles.label, { color: theme.textSecondary }]}>{t('cropNameLabel', 'Crop Name / Commodity')}</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: theme.backgroundSubtle, borderColor: theme.border, color: theme.textPrimary }]}
               value={cropName}
               onChangeText={setCropName}
               placeholder="e.g. Tomato (Himsona)"
+              placeholderTextColor={theme.textMuted}
             />
 
             <View style={styles.row}>
               <View style={styles.halfCol}>
-                <Text style={styles.label}>Quantity</Text>
+                <Text style={[styles.label, { color: theme.textSecondary }]}>{t('quantity', 'Quantity')}</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { backgroundColor: theme.backgroundSubtle, borderColor: theme.border, color: theme.textPrimary }]}
                   value={quantity}
                   onChangeText={setQuantity}
                   keyboardType="numeric"
                   placeholder="50"
+                  placeholderTextColor={theme.textMuted}
                 />
               </View>
 
               <View style={styles.halfCol}>
-                <Text style={styles.label}>Unit</Text>
+                <Text style={[styles.label, { color: theme.textSecondary }]}>{t('unitLabel', 'Unit')}</Text>
                 <View style={styles.unitRow}>
                   {(['kg', 'crates', 'quintal'] as const).map((u) => (
                     <TouchableOpacity
                       key={u}
-                      style={[styles.unitChip, unit === u && styles.unitChipActive]}
+                      style={[
+                        styles.unitChip,
+                        { backgroundColor: theme.backgroundSubtle, borderColor: theme.border },
+                        unit === u && { backgroundColor: theme.primaryLight, borderColor: theme.primary },
+                      ]}
                       onPress={() => setUnit(u)}
                     >
-                      <Text style={[styles.unitText, unit === u && styles.unitTextActive]}>{u}</Text>
+                      <Text style={[
+                        styles.unitText,
+                        { color: theme.textSecondary },
+                        unit === u && { color: theme.primaryDark, fontWeight: '700' },
+                      ]}>{u}</Text>
                     </TouchableOpacity>
                   ))}
                 </View>
               </View>
             </View>
 
-            <Text style={styles.label}>Expected Selling Date</Text>
+            <Text style={[styles.label, { color: theme.textSecondary }]}>{t('sellingDateLabel', 'Expected Selling Date')}</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: theme.backgroundSubtle, borderColor: theme.border, color: theme.textPrimary }]}
               value={sellingDate}
               onChangeText={setSellingDate}
               placeholder="YYYY-MM-DD"
+              placeholderTextColor={theme.textMuted}
             />
 
             <TouchableOpacity style={styles.submitBtn} onPress={handleSave} activeOpacity={0.85}>
               <LinearGradient
-                colors={['#16a34a', '#15803d']}
+                colors={theme.gradientGreen}
                 style={styles.btnGradient}
               >
                 <Feather name="check-circle" size={18} color="#ffffff" />
-                <Text style={styles.btnText}>Add to Cold Storage</Text>
+                <Text style={styles.btnText}>{t('addToStorageBtn', 'Add to Cold Storage')}</Text>
               </LinearGradient>
             </TouchableOpacity>
           </ScrollView>

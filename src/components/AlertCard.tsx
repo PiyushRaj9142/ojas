@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
+import { useLanguage } from '../i18n/LanguageContext';
 import { StorageAlert } from '../types/alert';
 
 interface AlertCardProps {
@@ -10,23 +12,30 @@ interface AlertCardProps {
 }
 
 export default function AlertCard({ alert, onPress }: AlertCardProps) {
+  const { theme } = useTheme();
+  const { language, t } = useLanguage();
+
   let iconName: keyof typeof MaterialCommunityIcons.glyphMap = 'information';
-  let iconColor = colors.info;
-  let bgBadge = colors.infoLight;
+  let iconColor = theme.info;
+  let bgBadge = theme.infoLight;
 
   if (alert.severity === 'CRITICAL') {
     iconName = 'alert-circle';
-    iconColor = colors.danger;
-    bgBadge = colors.dangerLight;
+    iconColor = theme.danger;
+    bgBadge = theme.dangerLight;
   } else if (alert.severity === 'WARNING') {
     iconName = 'alert';
-    iconColor = colors.warning;
-    bgBadge = colors.warningLight;
+    iconColor = theme.warning;
+    bgBadge = theme.warningLight;
   }
 
   return (
     <TouchableOpacity
-      style={[styles.card, !alert.read && styles.unreadCard]}
+      style={[
+        styles.card,
+        { backgroundColor: theme.card, borderColor: theme.border },
+        !alert.read && [styles.unreadCard, { borderLeftColor: theme.primary }],
+      ]}
       onPress={onPress}
       activeOpacity={onPress ? 0.7 : 1}
     >
@@ -36,19 +45,19 @@ export default function AlertCard({ alert, onPress }: AlertCardProps) {
             <MaterialCommunityIcons name={iconName} size={18} color={iconColor} />
           </View>
           <View style={styles.titleBlock}>
-            <Text style={styles.title}>{alert.title}</Text>
-            <Text style={styles.timestamp}>{alert.timestamp}</Text>
+            <Text style={[styles.title, { color: theme.textPrimary }]}>{alert.title}</Text>
+            <Text style={[styles.timestamp, { color: theme.textMuted }]}>{alert.timestamp}</Text>
           </View>
         </View>
 
-        {!alert.read && <View style={styles.unreadDot} />}
+        {!alert.read && <View style={[styles.unreadDot, { backgroundColor: theme.primary }]} />}
       </View>
 
-      <Text style={styles.description}>{alert.description}</Text>
+      <Text style={[styles.description, { color: theme.textSecondary }]}>{alert.description}</Text>
 
       {alert.actionRequired && (
-        <View style={styles.actionPill}>
-          <Text style={styles.actionText}>Action: {alert.actionRequired}</Text>
+        <View style={[styles.actionPill, { backgroundColor: theme.primaryLight }]}>
+          <Text style={[styles.actionText, { color: theme.primaryDark }]}>{t('actionPrefix', 'Action')}: {alert.actionRequired}</Text>
         </View>
       )}
     </TouchableOpacity>

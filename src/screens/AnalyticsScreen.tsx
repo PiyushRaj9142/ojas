@@ -3,11 +3,15 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from
 import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import Svg, { Path, Circle, Line, Text as SvgText, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
 import { colors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
+import { useLanguage } from '../i18n/LanguageContext';
 import { MOCK_HOURLY_SENSOR_LOGS } from '../data/mockSensors';
 
 const screenWidth = Dimensions.get('window').width;
 
 export default function AnalyticsScreen() {
+  const { theme } = useTheme();
+  const { language, t } = useLanguage();
   const [activeTab, setActiveTab] = useState<'TEMP' | 'HUMIDITY' | 'ENERGY' | 'STORAGE' | 'SAVINGS'>('TEMP');
 
   const chartWidth = screenWidth - 64;
@@ -22,10 +26,10 @@ export default function AnalyticsScreen() {
         vals,
         min: 3.5,
         max: 6.5,
-        color: colors.secondary,
+        color: theme.secondary,
         unit: '°C',
-        title: 'Core Temperature (Last 24 Hours)',
-        sub: 'Optimal Range: 4.0°C - 5.5°C',
+        title: t('coreTemp24h', 'Core Temperature (Last 24 Hours)'),
+        sub: `${t('optimalRange', 'Optimal Range')}: 4.0°C - 5.5°C`,
       };
     }
     if (activeTab === 'HUMIDITY') {
@@ -34,10 +38,10 @@ export default function AnalyticsScreen() {
         vals,
         min: 60,
         max: 85,
-        color: colors.secondary,
+        color: theme.secondary,
         unit: '%',
-        title: 'Relative Humidity RH (Last 24 Hours)',
-        sub: 'Optimal Range: 70% - 80%',
+        title: t('relHumidity24h', 'Relative Humidity RH (Last 24 Hours)'),
+        sub: `${t('optimalRange', 'Optimal Range')}: 70% - 80%`,
       };
     }
     if (activeTab === 'ENERGY') {
@@ -46,10 +50,10 @@ export default function AnalyticsScreen() {
         vals,
         min: 0.5,
         max: 4.0,
-        color: colors.primary,
+        color: theme.primary,
         unit: 'kW',
-        title: 'Hourly Clean Wind Generation',
-        sub: 'Peak: 3.1 kW at 12:00 PM',
+        title: t('windGenHourly', 'Hourly Clean Wind Generation'),
+        sub: 'Peak: 3.1 kW (12:00 PM)',
       };
     }
     const vals = [62, 64, 65, 68, 68];
@@ -57,10 +61,10 @@ export default function AnalyticsScreen() {
       vals,
       min: 50,
       max: 100,
-      color: colors.primary,
+      color: theme.primary,
       unit: '%',
-      title: 'Storage Capacity Utilization',
-      sub: 'Current: 342 kg / 500 kg',
+      title: t('storageCapUtil', 'Storage Capacity Utilization'),
+      sub: `Current: 342 kg / 500 kg`,
     };
   };
 
@@ -81,25 +85,33 @@ export default function AnalyticsScreen() {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: theme.background }]}
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
     >
       {/* 5 Analytic Navigation Tabs */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabsScroll}>
         {[
-          { id: 'TEMP' as const, label: '🌡 Temp' },
-          { id: 'HUMIDITY' as const, label: '💧 Humidity' },
-          { id: 'ENERGY' as const, label: '⚡ Energy' },
-          { id: 'STORAGE' as const, label: '📦 Storage' },
-          { id: 'SAVINGS' as const, label: '💰 Savings' },
+          { id: 'TEMP' as const, label: t('tempTab', '🌡 Temp') },
+          { id: 'HUMIDITY' as const, label: t('humidityTab', '💧 Humidity') },
+          { id: 'ENERGY' as const, label: t('energyTab', '⚡ Energy') },
+          { id: 'STORAGE' as const, label: t('storageTab', '📦 Storage') },
+          { id: 'SAVINGS' as const, label: t('savingsTab', '💰 Savings') },
         ].map((tab) => (
           <TouchableOpacity
             key={tab.id}
-            style={[styles.tabChip, activeTab === tab.id && styles.tabChipActive]}
+            style={[
+              styles.tabChip,
+              { backgroundColor: theme.card, borderColor: theme.border },
+              activeTab === tab.id && { backgroundColor: theme.primaryLight, borderColor: theme.primary },
+            ]}
             onPress={() => setActiveTab(tab.id)}
           >
-            <Text style={[styles.tabText, activeTab === tab.id && styles.tabTextActive]}>
+            <Text style={[
+              styles.tabText,
+              { color: theme.textSecondary },
+              activeTab === tab.id && { color: theme.primaryDark, fontWeight: '700' },
+            ]}>
               {tab.label}
             </Text>
           </TouchableOpacity>
@@ -108,10 +120,10 @@ export default function AnalyticsScreen() {
 
       {/* Main Analytic SVG Chart */}
       {activeTab !== 'SAVINGS' ? (
-        <View style={styles.chartCard}>
+        <View style={[styles.chartCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
           <View style={styles.chartHeader}>
-            <Text style={styles.chartTitle}>{config.title}</Text>
-            <Text style={styles.chartSub}>{config.sub}</Text>
+            <Text style={[styles.chartTitle, { color: theme.textPrimary }]}>{config.title}</Text>
+            <Text style={[styles.chartSub, { color: theme.textMuted }]}>{config.sub}</Text>
           </View>
 
           <View style={styles.svgWrapper}>
@@ -123,9 +135,9 @@ export default function AnalyticsScreen() {
                 </SvgLinearGradient>
               </Defs>
 
-              <Line x1={paddingX} y1={paddingY} x2={chartWidth - paddingX} y2={paddingY} stroke="#e2e8f0" strokeDasharray="4, 4" />
-              <Line x1={paddingX} y1={chartHeight / 2} x2={chartWidth - paddingX} y2={chartHeight / 2} stroke="#e2e8f0" strokeDasharray="4, 4" />
-              <Line x1={paddingX} y1={chartHeight - paddingY} x2={chartWidth - paddingX} y2={chartHeight - paddingY} stroke="#cbd5e1" />
+              <Line x1={paddingX} y1={paddingY} x2={chartWidth - paddingX} y2={paddingY} stroke={theme.border} strokeDasharray="4, 4" />
+              <Line x1={paddingX} y1={chartHeight / 2} x2={chartWidth - paddingX} y2={chartHeight / 2} stroke={theme.border} strokeDasharray="4, 4" />
+              <Line x1={paddingX} y1={chartHeight - paddingY} x2={chartWidth - paddingX} y2={chartHeight - paddingY} stroke={theme.border} />
 
               <Path d={areaD} fill="url(#analyticsGrad)" />
               <Path d={pathD} fill="none" stroke={config.color} strokeWidth="3" strokeLinecap="round" />
@@ -133,10 +145,10 @@ export default function AnalyticsScreen() {
               {points.map((pt, idx) => (
                 <React.Fragment key={idx}>
                   <Circle cx={pt.x} cy={pt.y} r={3.5} fill={config.color} stroke="#ffffff" strokeWidth={1.5} />
-                  <SvgText x={pt.x} y={chartHeight - 4} fontSize="9" fill={colors.textMuted} textAnchor="middle">
+                  <SvgText x={pt.x} y={chartHeight - 4} fontSize="9" fill={theme.textMuted} textAnchor="middle">
                     {pt.label}
                   </SvgText>
-                  <SvgText x={pt.x} y={pt.y - 7} fontSize="8.5" fontWeight="700" fill={colors.textPrimary} textAnchor="middle">
+                  <SvgText x={pt.x} y={pt.y - 7} fontSize="8.5" fontWeight="700" fill={theme.textPrimary} textAnchor="middle">
                     {pt.val}{config.unit}
                   </SvgText>
                 </React.Fragment>
@@ -147,41 +159,41 @@ export default function AnalyticsScreen() {
       ) : null}
 
       {/* Comprehensive Farmer Economic Savings Breakdown */}
-      <View style={styles.savingsCard}>
+      <View style={[styles.savingsCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
         <View style={styles.savingsHeader}>
-          <MaterialCommunityIcons name="piggy-bank" size={20} color={colors.primary} />
-          <Text style={styles.savingsTitle}>Farmer Economic Savings</Text>
+          <MaterialCommunityIcons name="piggy-bank" size={20} color={theme.primary} />
+          <Text style={[styles.savingsTitle, { color: theme.textPrimary }]}>{t('farmerEconomicSavings', 'Farmer Economic Savings')}</Text>
         </View>
 
         <View style={styles.savingsGrid}>
-          <View style={styles.savingRow}>
+          <View style={[styles.savingRow, { backgroundColor: theme.backgroundSubtle }]}>
             <View style={styles.savingRowLeft}>
-              <Text style={styles.savingRowTitle}>Clean Electricity Saved</Text>
-              <Text style={styles.savingRowSub}>34.8 kWh off-grid renewable energy</Text>
+              <Text style={[styles.savingRowTitle, { color: theme.textPrimary }]}>{t('cleanElectricitySaved', 'Clean Electricity Saved')}</Text>
+              <Text style={[styles.savingRowSub, { color: theme.textMuted }]}>{t('offgridRenewable', '34.8 kWh off-grid renewable energy')}</Text>
             </View>
-            <Text style={[styles.savingRowVal, { color: colors.primary }]}>+₹8,850/mo</Text>
+            <Text style={[styles.savingRowVal, { color: theme.primary }]}>+₹8,850/mo</Text>
           </View>
 
-          <View style={styles.savingRow}>
+          <View style={[styles.savingRow, { backgroundColor: theme.backgroundSubtle }]}>
             <View style={styles.savingRowLeft}>
-              <Text style={styles.savingRowTitle}>Post-Harvest Spoilage Prevented</Text>
-              <Text style={styles.savingRowSub}>85% reduction in crop rot & weight loss</Text>
+              <Text style={[styles.savingRowTitle, { color: theme.textPrimary }]}>{t('spoilagePrevented', 'Post-Harvest Spoilage Prevented')}</Text>
+              <Text style={[styles.savingRowSub, { color: theme.textMuted }]}>{t('spoilageReductionSub', '85% reduction in crop rot & weight loss')}</Text>
             </View>
-            <Text style={[styles.savingRowVal, { color: colors.secondary }]}>+₹14,200/mo</Text>
+            <Text style={[styles.savingRowVal, { color: theme.secondary }]}>+₹14,200/mo</Text>
           </View>
 
-          <View style={styles.savingRow}>
+          <View style={[styles.savingRow, { backgroundColor: theme.backgroundSubtle }]}>
             <View style={styles.savingRowLeft}>
-              <Text style={styles.savingRowTitle}>Arbitrage Market Price Gain</Text>
-              <Text style={styles.savingRowSub}>Selling at peak prices after 5-7 days cold store</Text>
+              <Text style={[styles.savingRowTitle, { color: theme.textPrimary }]}>{t('arbitragePriceGain', 'Arbitrage Market Price Gain')}</Text>
+              <Text style={[styles.savingRowSub, { color: theme.textMuted }]}>{t('arbitrageSub', 'Selling at peak prices after 5-7 days cold store')}</Text>
             </View>
-            <Text style={[styles.savingRowVal, { color: colors.primary }]}>+₹9,400/mo</Text>
+            <Text style={[styles.savingRowVal, { color: theme.primary }]}>+₹9,400/mo</Text>
           </View>
         </View>
 
-        <View style={styles.totalSavingsBox}>
-          <Text style={styles.totalSavingsLabel}>Estimated Monthly Net Profit Boost</Text>
-          <Text style={styles.totalSavingsValue}>₹32,450 / Month</Text>
+        <View style={[styles.totalSavingsBox, { backgroundColor: theme.primaryLight }]}>
+          <Text style={[styles.totalSavingsLabel, { color: theme.primaryDark }]}>{t('monthlyProfitBoost', 'Estimated Monthly Net Profit Boost')}</Text>
+          <Text style={[styles.totalSavingsValue, { color: theme.primaryDark }]}>₹32,450 / {t('daysRemaining', 'Month')}</Text>
         </View>
       </View>
     </ScrollView>
@@ -195,7 +207,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 16,
-    paddingBottom: 90,
+    paddingBottom: 120,
   },
   tabsScroll: {
     flexDirection: 'row',

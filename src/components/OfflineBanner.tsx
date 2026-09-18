@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
-import { colors } from '../theme/colors';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface OfflineBannerProps {
   isOffline: boolean;
@@ -9,19 +9,22 @@ interface OfflineBannerProps {
 }
 
 export default function OfflineBanner({ isOffline, onSync }: OfflineBannerProps) {
+  const { t } = useLanguage();
   if (!isOffline) return null;
 
   return (
     <View style={styles.banner}>
       <View style={styles.left}>
         <MaterialCommunityIcons name="cloud-off-outline" size={16} color="#ffffff" />
-        <Text style={styles.text}>OFFLINE MODE • Showing last synced data (2m ago)</Text>
+        <Text style={styles.text}>
+          {t('offlineBannerTitle', 'OFFLINE MODE')} • {t('offlineBannerDesc', 'Showing last synced sensor data')}
+        </Text>
       </View>
 
       {onSync && (
         <TouchableOpacity style={styles.syncBtn} onPress={onSync} activeOpacity={0.8}>
           <Feather name="refresh-cw" size={12} color="#ffffff" />
-          <Text style={styles.syncText}>Sync</Text>
+          <Text style={styles.syncText}>{t('syncNow', 'Sync')}</Text>
         </TouchableOpacity>
       )}
     </View>

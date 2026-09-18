@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import { ThemeMode } from '../theme/colors';
 import { useTheme } from '../theme/ThemeContext';
+import { useLanguage } from '../i18n/LanguageContext';
 import { LanguageCode } from '../types/user';
 import ThemeSwitcher from './ThemeSwitcher';
 
@@ -15,13 +16,15 @@ export interface ThemeSelectorProps {
 }
 
 export default function ThemeSelector({
-  language = 'en',
+  language: propLanguage,
   compact = false,
   variant = 'segmented',
   onThemeChanged,
   style,
 }: ThemeSelectorProps) {
   const { theme, themeMode, setThemeMode } = useTheme();
+  const { language: ctxLanguage } = useLanguage();
+  const language = propLanguage || ctxLanguage;
 
   if (variant === 'dropdown') {
     return (

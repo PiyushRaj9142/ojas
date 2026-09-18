@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
+import { useLanguage } from '../i18n/LanguageContext';
 import { CropItem } from '../types/crop';
 import StatusBadge from './StatusBadge';
 
@@ -11,9 +13,14 @@ interface CropCardProps {
 }
 
 export default function CropCard({ crop, onPress }: CropCardProps) {
+  const { theme } = useTheme();
+  const { language, t } = useLanguage();
+
+  const displayName = language !== 'en' && crop.nameHi ? crop.nameHi : crop.name;
+
   return (
     <TouchableOpacity
-      style={styles.card}
+      style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}
       onPress={() => onPress(crop)}
       activeOpacity={0.75}
     >
@@ -23,8 +30,8 @@ export default function CropCard({ crop, onPress }: CropCardProps) {
             <Text style={styles.emoji}>{crop.iconEmoji}</Text>
           </View>
           <View style={styles.nameBlock}>
-            <Text style={styles.cropName} numberOfLines={1}>{crop.name}</Text>
-            <Text style={styles.category}>{crop.category}</Text>
+            <Text style={[styles.cropName, { color: theme.textPrimary }]} numberOfLines={1}>{displayName}</Text>
+            <Text style={[styles.category, { color: theme.textMuted }]}>{crop.category}</Text>
           </View>
         </View>
 
@@ -33,41 +40,41 @@ export default function CropCard({ crop, onPress }: CropCardProps) {
 
       <View style={styles.metricsRow}>
         <View style={styles.metricCol}>
-          <Text style={styles.metricLabel}>Quantity</Text>
-          <Text style={styles.metricValue}>{crop.quantity} {crop.unit}</Text>
+          <Text style={[styles.metricLabel, { color: theme.textMuted }]}>{t('quantity', 'Quantity')}</Text>
+          <Text style={[styles.metricValue, { color: theme.textPrimary }]}>{crop.quantity} {crop.unit}</Text>
         </View>
 
         <View style={styles.metricCol}>
-          <Text style={styles.metricLabel}>Freshness</Text>
-          <Text style={[styles.metricValue, { color: crop.freshnessPercentage >= 80 ? colors.success : colors.warning }]}>
+          <Text style={[styles.metricLabel, { color: theme.textMuted }]}>{t('freshnessScore', 'Freshness')}</Text>
+          <Text style={[styles.metricValue, { color: crop.freshnessPercentage >= 80 ? theme.success : theme.warning }]}>
             {crop.freshnessPercentage}%
           </Text>
         </View>
 
         <View style={styles.metricCol}>
-          <Text style={styles.metricLabel}>Shelf Life</Text>
-          <Text style={[styles.metricValue, { color: colors.secondary }]}>
-            {crop.shelfLifeDays} Days
+          <Text style={[styles.metricLabel, { color: theme.textMuted }]}>{t('shelfLife', 'Shelf Life')}</Text>
+          <Text style={[styles.metricValue, { color: theme.secondary }]}>
+            {crop.shelfLifeDays} {t('daysRemaining', 'Days')}
           </Text>
         </View>
 
         <View style={styles.metricCol}>
-          <Text style={styles.metricLabel}>Est. Value</Text>
-          <Text style={[styles.metricValue, { color: colors.textPrimary }]}>
+          <Text style={[styles.metricLabel, { color: theme.textMuted }]}>{t('estimatedValue', 'Est. Value')}</Text>
+          <Text style={[styles.metricValue, { color: theme.textPrimary }]}>
             ₹{crop.estimatedTotalMarketValue}
           </Text>
         </View>
       </View>
 
       <View style={styles.footerRow}>
-        <View style={styles.tempPill}>
-          <MaterialCommunityIcons name="snowflake" size={12} color={colors.secondary} />
-          <Text style={styles.tempText}>{crop.currentTemp}°C</Text>
+        <View style={[styles.tempPill, { backgroundColor: theme.secondaryLight }]}>
+          <MaterialCommunityIcons name="snowflake" size={12} color={theme.secondary} />
+          <Text style={[styles.tempText, { color: theme.secondary }]}>{crop.currentTemp}°C</Text>
         </View>
 
         <View style={styles.viewDetailsRow}>
-          <Text style={styles.viewDetailsText}>Details & AI Advice</Text>
-          <Feather name="arrow-right" size={13} color={colors.secondary} />
+          <Text style={[styles.viewDetailsText, { color: theme.secondary }]}>{t('detailsAndAdvice', 'Details & AI Advice')}</Text>
+          <Feather name="arrow-right" size={13} color={theme.secondary} />
         </View>
       </View>
     </TouchableOpacity>

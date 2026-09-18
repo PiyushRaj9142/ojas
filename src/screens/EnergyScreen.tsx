@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from
 import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import Svg, { Path, Circle, Line, Text as SvgText, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
 import { colors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
+import { useLanguage } from '../i18n/LanguageContext';
 import { SensorTelemetry } from '../types/sensor';
 import EnergyFlow from '../components/EnergyFlow';
 import { DAILY_ENERGY_POINTS, WEEKLY_ENERGY_POINTS, MONTHLY_ENERGY_POINTS } from '../data/mockEnergy';
@@ -14,6 +16,8 @@ interface EnergyScreenProps {
 }
 
 export default function EnergyScreen({ telemetry }: EnergyScreenProps) {
+  const { theme } = useTheme();
+  const { t } = useLanguage();
   const [period, setPeriod] = useState<'daily' | 'weekly' | 'monthly'>('daily');
   const [activeMetric, setActiveMetric] = useState<'generation' | 'battery' | 'consumption'>('generation');
 
@@ -45,47 +49,47 @@ export default function EnergyScreen({ telemetry }: EnergyScreenProps) {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: theme.background }]}
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
     >
       {/* 1. Main Energy Management Overview Card */}
-      <View style={styles.mainCard}>
+      <View style={[styles.mainCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
         <View style={styles.cardHeader}>
           <View>
-            <Text style={styles.cardSub}>HYBRID MICRO-GRID TELEMETRY</Text>
-            <Text style={styles.cardTitle}>Energy Management</Text>
+            <Text style={[styles.cardSub, { color: theme.textMuted }]}>{t('cleanEnergyFlow', 'HYBRID MICRO-GRID TELEMETRY')}</Text>
+            <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>{t('navEnergy', 'Energy Management')}</Text>
           </View>
-          <View style={styles.gridTag}>
-            <MaterialCommunityIcons name="flash-off" size={14} color={colors.primary} />
-            <Text style={styles.gridTagText}>Grid: Not Required</Text>
+          <View style={[styles.gridTag, { backgroundColor: theme.primaryLight }]}>
+            <MaterialCommunityIcons name="flash-off" size={14} color={theme.primary} />
+            <Text style={[styles.gridTagText, { color: theme.primaryDark }]}>{t('gridIndependence', 'Grid Independence: 100%')}</Text>
           </View>
         </View>
 
         <View style={styles.overviewGrid}>
           <View style={styles.overviewCol}>
-            <Text style={styles.colLabel}>Current Gen</Text>
+            <Text style={styles.colLabel}>{t('renewablePower', 'Current Gen')}</Text>
             <Text style={[styles.colVal, { color: colors.secondary }]}>
               {telemetry.windGenerationKw.toFixed(1)} <Text style={styles.colUnit}>kW</Text>
             </Text>
           </View>
 
           <View style={styles.overviewCol}>
-            <Text style={styles.colLabel}>Battery SOC</Text>
+            <Text style={styles.colLabel}>{t('batterySoc', 'Battery SOC')}</Text>
             <Text style={[styles.colVal, { color: colors.primary }]}>
               {telemetry.batteryLevel}%
             </Text>
           </View>
 
           <View style={styles.overviewCol}>
-            <Text style={styles.colLabel}>Consumption</Text>
+            <Text style={styles.colLabel}>{t('powerConsumption', 'Consumption')}</Text>
             <Text style={[styles.colVal, { color: colors.textPrimary }]}>
               {telemetry.powerConsumptionKw.toFixed(1)} <Text style={styles.colUnit}>kW</Text>
             </Text>
           </View>
 
           <View style={styles.overviewCol}>
-            <Text style={styles.colLabel}>Net Available</Text>
+            <Text style={styles.colLabel}>{t('netSurplus', 'Net Available')}</Text>
             <Text style={[styles.colVal, { color: colors.success }]}>
               +{telemetry.powerAvailableKw.toFixed(1)} <Text style={styles.colUnit}>kW</Text>
             </Text>
@@ -104,7 +108,7 @@ export default function EnergyScreen({ telemetry }: EnergyScreenProps) {
       {/* 2. Interactive SVG Generation & Consumption Charts */}
       <View style={styles.chartCard}>
         <View style={styles.chartHeaderRow}>
-          <Text style={styles.chartTitle}>Power & Battery Trends</Text>
+          <Text style={styles.chartTitle}>{t('renewableYieldAnalytics', 'Power & Battery Trends')}</Text>
 
           {/* Time Period Tabs */}
           <View style={styles.periodTabs}>
@@ -115,63 +119,53 @@ export default function EnergyScreen({ telemetry }: EnergyScreenProps) {
                 onPress={() => setPeriod(p)}
               >
                 <Text style={[styles.periodText, period === p && styles.periodTextActive]}>
-                  {p === 'daily' ? 'Today' : p === 'weekly' ? 'Week' : 'Month'}
+                  {p.toUpperCase()}
                 </Text>
               </TouchableOpacity>
             ))}
           </View>
         </View>
 
-        {/* Metric Selector Chips */}
-        <View style={styles.metricSelectorRow}>
-          <TouchableOpacity
-            style={[styles.metricChip, activeMetric === 'generation' && styles.metricChipActive]}
-            onPress={() => setActiveMetric('generation')}
-          >
-            <Text style={[styles.metricChipText, activeMetric === 'generation' && { color: colors.secondary, fontWeight: '800' }]}>
-              🌬 Wind Generation
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.metricChip, activeMetric === 'battery' && styles.metricChipActive]}
-            onPress={() => setActiveMetric('battery')}
-          >
-            <Text style={[styles.metricChipText, activeMetric === 'battery' && { color: colors.primary, fontWeight: '800' }]}>
-              🔋 Battery SOC
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.metricChip, activeMetric === 'consumption' && styles.metricChipActive]}
-            onPress={() => setActiveMetric('consumption')}
-          >
-            <Text style={[styles.metricChipText, activeMetric === 'consumption' && { color: colors.warning, fontWeight: '800' }]}>
-              ❄ Cooling Load
-            </Text>
-          </TouchableOpacity>
+        {/* Metric Selector Tabs */}
+        <View style={styles.metricTabs}>
+          {[
+            { id: 'generation' as const, label: t('renewablePower', 'Generation (kW)'), icon: 'weather-windy' },
+            { id: 'battery' as const, label: t('batteryReserve', 'Battery (%)'), icon: 'battery-charging' },
+            { id: 'consumption' as const, label: t('powerConsumption', 'Demand (kW)'), icon: 'flash' },
+          ].map((m) => (
+            <TouchableOpacity
+              key={m.id}
+              style={[styles.metricTab, activeMetric === m.id && styles.metricTabActive]}
+              onPress={() => setActiveMetric(m.id)}
+            >
+              <MaterialCommunityIcons name={m.icon as any} size={14} color={activeMetric === m.id ? colors.primary : colors.textMuted} />
+              <Text style={[styles.metricLabel, activeMetric === m.id && styles.metricLabelActive]}>{m.label}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
 
-        {/* SVG Curve */}
-        <View style={styles.svgWrapper}>
+        {/* SVG Bezier Line Chart */}
+        <View style={styles.chartSvgContainer}>
           <Svg width={chartWidth} height={chartHeight}>
             <Defs>
-              <SvgLinearGradient id="energyGrad" x1="0" y1="0" x2="0" y2="1">
+              <SvgLinearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
                 <Stop offset="0" stopColor={metricColor} stopOpacity="0.3" />
                 <Stop offset="1" stopColor={metricColor} stopOpacity="0.0" />
               </SvgLinearGradient>
             </Defs>
 
-            {/* Grid */}
-            <Line x1={paddingX} y1={paddingY} x2={chartWidth - paddingX} y2={paddingY} stroke="#e2e8f0" strokeDasharray="4, 4" />
-            <Line x1={paddingX} y1={chartHeight / 2} x2={chartWidth - paddingX} y2={chartHeight / 2} stroke="#e2e8f0" strokeDasharray="4, 4" />
-            <Line x1={paddingX} y1={chartHeight - paddingY} x2={chartWidth - paddingX} y2={chartHeight - paddingY} stroke="#cbd5e1" />
+            {/* Background Grid Lines */}
+            <Line x1={paddingX} y1={paddingY} x2={chartWidth - paddingX} y2={paddingY} stroke={colors.border} strokeDasharray="3,3" />
+            <Line x1={paddingX} y1={chartHeight / 2} x2={chartWidth - paddingX} y2={chartHeight / 2} stroke={colors.border} strokeDasharray="3,3" />
+            <Line x1={paddingX} y1={chartHeight - paddingY} x2={chartWidth - paddingX} y2={chartHeight - paddingY} stroke={colors.border} strokeWidth={1} />
 
-            {/* Area & Line */}
-            <Path d={areaD} fill="url(#energyGrad)" />
-            <Path d={pathD} fill="none" stroke={metricColor} strokeWidth="3" strokeLinecap="round" />
+            {/* Area Fill */}
+            <Path d={areaD} fill="url(#chartGrad)" />
 
-            {/* Points and Labels */}
+            {/* Line Path */}
+            <Path d={pathD} fill="none" stroke={metricColor} strokeWidth={2.5} />
+
+            {/* Data Points */}
             {points.map((pt, idx) => (
               <React.Fragment key={idx}>
                 <Circle cx={pt.x} cy={pt.y} r={4} fill={metricColor} stroke="#ffffff" strokeWidth={1.5} />
@@ -189,24 +183,24 @@ export default function EnergyScreen({ telemetry }: EnergyScreenProps) {
 
       {/* 3. Renewable & Environmental Impact Cards */}
       <View style={styles.impactCard}>
-        <Text style={styles.impactTitle}>Clean Energy & Carbon Offset</Text>
+        <Text style={styles.impactTitle}>{t('generationBreakdown', 'Clean Energy & Carbon Offset')}</Text>
         <View style={styles.impactGrid}>
           <View style={styles.impactItem}>
             <MaterialCommunityIcons name="leaf" size={20} color={colors.primary} />
             <Text style={styles.impactVal}>28.5 kg</Text>
-            <Text style={styles.impactLabel}>Daily CO₂ Offset</Text>
+            <Text style={styles.impactLabel}>{t('savedProduceKg', 'Daily CO₂ Offset')}</Text>
           </View>
 
           <View style={styles.impactItem}>
             <MaterialCommunityIcons name="gas-station-off" size={20} color={colors.secondary} />
             <Text style={styles.impactVal}>11.2 L</Text>
-            <Text style={styles.impactLabel}>Diesel Saved</Text>
+            <Text style={styles.impactLabel}>{t('gridIndependence', 'Diesel Saved')}</Text>
           </View>
 
           <View style={styles.impactItem}>
             <MaterialCommunityIcons name="currency-inr" size={20} color={colors.primary} />
             <Text style={styles.impactVal}>₹295/day</Text>
-            <Text style={styles.impactLabel}>Electricity Saved</Text>
+            <Text style={styles.impactLabel}>{t('farmerProfitGained', 'Electricity Saved')}</Text>
           </View>
         </View>
       </View>
@@ -221,7 +215,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 16,
-    paddingBottom: 90,
+    paddingBottom: 120,
   },
   mainCard: {
     backgroundColor: colors.card,
@@ -339,26 +333,38 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: '800',
   },
-  metricSelectorRow: {
+  metricTabs: {
     flexDirection: 'row',
     gap: 6,
-    marginBottom: 10,
+    marginBottom: 12,
   },
-  metricChip: {
+  metricTab: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     backgroundColor: colors.backgroundSubtle,
-    paddingHorizontal: 8,
-    paddingVertical: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     borderRadius: 8,
   },
-  metricChipActive: {
-    backgroundColor: '#ffffff',
+  metricTabActive: {
+    backgroundColor: colors.primaryLight,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.primary,
   },
-  metricChipText: {
-    fontSize: 10,
+  metricLabel: {
+    fontSize: 11,
     color: colors.textSecondary,
     fontWeight: '600',
+  },
+  metricLabelActive: {
+    color: colors.primaryDark,
+    fontWeight: '700',
+  },
+  chartSvgContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 4,
   },
   svgWrapper: {
     alignItems: 'center',
