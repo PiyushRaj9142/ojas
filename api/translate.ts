@@ -33,7 +33,16 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { text, target_language = 'hi' } = req.body || {};
+  let body = req.body;
+  if (typeof body === 'string') {
+    try {
+      body = JSON.parse(body);
+    } catch {
+      body = {};
+    }
+  }
+
+  const { text, target_language = 'hi' } = body || {};
 
   if (!text || typeof text !== 'string' || !text.trim()) {
     return res.status(200).json({ translated: '' });
@@ -43,7 +52,7 @@ export default async function handler(req: any, res: any) {
     return res.status(200).json({ translated: text });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '';
+  const apiKey = (process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '').trim();
   if (!apiKey) {
     // Return original text if key is not configured
     return res.status(200).json({ translated: text });
@@ -53,9 +62,12 @@ export default async function handler(req: any, res: any) {
   const prompt = `Translate the following text into ${targetDesc}. Preserve all numbers, units (°C, kg, kW, %, ppm), technical terms, and crop names accurately. Return ONLY the translated string without quotes or explanations:\n\n${text}`;
 
   const candidateModels = [
-    'gemini-2.5-flash',
-    'gemini-2.0-flash',
-    'gemini-1.5-flash'
+    'gemini-3.6-flash',
+    'gemini-3.5-flash-lite',
+    'gemini-flash-latest',
+    'gemini-flash-lite-latest',
+    'gemini-3.5-flash',
+    'gemini-3.7-flash'
   ];
 
   for (const model of candidateModels) {

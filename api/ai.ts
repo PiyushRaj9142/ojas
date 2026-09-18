@@ -92,7 +92,16 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { query, language = 'en', history = [] } = req.body || {};
+  let body = req.body;
+  if (typeof body === 'string') {
+    try {
+      body = JSON.parse(body);
+    } catch {
+      body = {};
+    }
+  }
+
+  const { query, language = 'en', history = [] } = body || {};
 
   if (!query || typeof query !== 'string' || !query.trim()) {
     return res.status(400).json({ error: 'Query is required' });
@@ -126,7 +135,7 @@ export default async function handler(req: any, res: any) {
   }
 
   // 2. Obtain Gemini API Key from Server Environment
-  const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '';
+  const apiKey = (process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '').trim();
 
   if (!apiKey) {
     // Graceful server-side fallback if key is not configured in Vercel yet
@@ -159,9 +168,12 @@ export default async function handler(req: any, res: any) {
   contents.push({ role: 'user', parts: [{ text: userPrompt }] });
 
   const candidateModels = [
-    'gemini-2.5-flash',
-    'gemini-2.0-flash',
-    'gemini-1.5-flash'
+    'gemini-3.6-flash',
+    'gemini-3.5-flash-lite',
+    'gemini-flash-latest',
+    'gemini-flash-lite-latest',
+    'gemini-3.5-flash',
+    'gemini-3.7-flash'
   ];
 
   let streamSuccess = false;
@@ -189,32 +201,42 @@ export default async function handler(req: any, res: any) {
         const decoder = new TextDecoder('utf-8');
         let buffer = '';
 
+        const processLine = (rawLine: string) => {
+          const trimmed = rawLine.trim();
+          if (trimmed.startsWith('data:')) {
+            const jsonStr = trimmed.slice(5).trim();
+            if (!jsonStr || jsonStr === '[DONE]') return;
+
+            try {
+              const parsed = JSON.parse(jsonStr);
+              for (const cand of parsed.candidates || []) {
+                for (const part of cand.content?.parts || []) {
+                  if (part.text) {
+                    res.write(`data: ${JSON.stringify({ chunk: part.text, done: false, model })}\n\n`);
+                  }
+                }
+              }
+            } catch {
+              // Ignore partial JSON
+            }
+          }
+        };
+
         while (true) {
           const { value, done } = await reader.read();
-          if (done) break;
+          if (done) {
+            if (buffer.trim()) {
+              processLine(buffer);
+            }
+            break;
+          }
 
           buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n\n');
+          const lines = buffer.split(/\r?\n/);
           buffer = lines.pop() || '';
 
           for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const jsonStr = line.slice(6).trim();
-              if (!jsonStr) continue;
-
-              try {
-                const parsed = JSON.parse(jsonStr);
-                for (const cand of parsed.candidates || []) {
-                  for (const part of cand.content?.parts || []) {
-                    if (part.text) {
-                      res.write(`data: ${JSON.stringify({ chunk: part.text, done: false, model })}\n\n`);
-                    }
-                  }
-                }
-              } catch {
-                // Ignore parse errors from partial chunks
-              }
-            }
+            processLine(line);
           }
         }
         break; // Successfully completed streaming with this model
