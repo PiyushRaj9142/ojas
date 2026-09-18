@@ -8,7 +8,7 @@ Built with **React Native + Expo + TypeScript**, designed as a mobile-first prod
 
 ---
 
-## ⚡ Core Concept.
+## ⚡ Core Concept
 
 ```
 🌬 WIND TURBINE (VAWT)
