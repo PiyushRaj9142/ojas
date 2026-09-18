@@ -4,7 +4,7 @@
  * without exposing private credentials to the client.
  */
 
-const LANGUAGE_PROMPT_DESCRIPTIONS: Record<string, string> = {
+const LANGUAGE_PROMPT_DESCRIPTIONS = {
   en: 'clear simple English',
   hi: 'natural Devanagari Hindi (हिन्दी) for Indian farmers',
   mr: 'natural Marathi (मराठी) for Maharashtra farmers',
@@ -19,7 +19,7 @@ const LANGUAGE_PROMPT_DESCRIPTIONS: Record<string, string> = {
   hinglish: 'conversational Hinglish (Roman Hindi + English)',
 };
 
-export default async function handler(req: any, res: any) {
+async function handler(req, res) {
   // CORS Headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -101,3 +101,6 @@ export default async function handler(req: any, res: any) {
   // Fallback if all models failed
   return res.status(200).json({ translated: text });
 }
+
+module.exports = handler;
+module.exports.default = handler;

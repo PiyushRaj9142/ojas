@@ -4,7 +4,6 @@
  * and RAG Cold Storage knowledge retrieval without exposing private API keys to the browser.
  */
 
-// Scope classifier & Security Guard for OJAS
 const OUT_OF_SCOPE_PHRASES = [
   'prime minister', 'president of', 'elon musk', 'who is', 'capital of',
   'python game', 'write python', 'write a game', 'javascript code', 'write code for',
@@ -34,7 +33,7 @@ const IN_SCOPE_KEYWORDS = [
   'kharab', 'fresh', 'freshness', 'shelf life', 'alert', 'booking', 'status', 'safe'
 ];
 
-function checkScope(query: string): { isThreat: boolean; isOutOfScope: boolean } {
+function checkScope(query) {
   const q = query.toLowerCase().trim();
   for (const threat of SECURITY_THREAT_PHRASES) {
     if (q.includes(threat)) return { isThreat: true, isOutOfScope: true };
@@ -49,7 +48,7 @@ function checkScope(query: string): { isThreat: boolean; isOutOfScope: boolean }
   return { isThreat: false, isOutOfScope: false };
 }
 
-const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
+const LANGUAGE_INSTRUCTIONS = {
   hi: 'उत्तर शुद्ध और स्वाभाविक हिंदी (Devanagari script) में दें। किसान के समझने योग्य सरल, आत्मीय और स्पष्ट भाषा का प्रयोग करें।',
   mr: 'उत्तर अस्खलित व सोप्या मराठी (मराठी) भाषेत द्या. महाराष्ट्रातील आणि नाशिकच्या शेतकऱ्यांसाठी समजण्याजोगे मार्गदर्शन करा.',
   bn: 'উত্তর সহজ ও স্বাভাবিক বাংলা (বাংলা) ভাষায় দিন। কৃষকদের উপযোগী তথ্যপূর্ণ উত্তর দিন।',
@@ -78,7 +77,7 @@ LIVE CHAMBER TELEMETRY & IOT CONTEXT:
 - Chamber Safety: SAFE (Ethylene 1.2 ppm, CO2 480 ppm, Inverter compressor running smoothly)
 `;
 
-export default async function handler(req: any, res: any) {
+async function handler(req, res) {
   // CORS Headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -153,7 +152,7 @@ export default async function handler(req: any, res: any) {
   }
 
   // 3. Prepare Gemini API Request
-  const contents: Array<{ role: string; parts: Array<{ text: string }> }> = [];
+  const contents = [];
 
   if (Array.isArray(history)) {
     for (const msg of history.slice(-6)) {
@@ -201,7 +200,7 @@ export default async function handler(req: any, res: any) {
         const decoder = new TextDecoder('utf-8');
         let buffer = '';
 
-        const processLine = (rawLine: string) => {
+        const processLine = (rawLine) => {
           const trimmed = rawLine.trim();
           if (trimmed.startsWith('data:')) {
             const jsonStr = trimmed.slice(5).trim();
@@ -255,3 +254,6 @@ export default async function handler(req: any, res: any) {
   res.write(`data: ${JSON.stringify({ chunk: '', done: true })}\n\n`);
   res.end();
 }
+
+module.exports = handler;
+module.exports.default = handler;
